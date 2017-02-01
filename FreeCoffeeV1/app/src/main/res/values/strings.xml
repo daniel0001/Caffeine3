@@ -11,4 +11,5 @@
     <string name="email_address">Email Address</string>
     <string name="welcome_msg_user_area">Welcome User Details</string>
     <string name="register">Register</string>
+    <string name="test">test</string>
 </resources>
