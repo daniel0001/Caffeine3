@@ -13,5 +13,6 @@
         <string name="register">Register</string>
         <string name="test">test</string>
         <string name="UKI_local_zero_start_phone_number">"0"</string>
+        <string name="request_user_info">"Please complete the user info"</string>
     </resources>
 
