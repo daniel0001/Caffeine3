@@ -1,11 +1,16 @@
-package mycompany.freecoffeev1;
+package practice.loginregisteruser;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import static practice.loginregisteruser.R.string.UKI_local_zero_start_phone_number;
+
+/**
+ * Created by Daniel on 06/02/2017.
+ */
 
 public class UserAreaActivity extends AppCompatActivity {
 
@@ -37,7 +42,7 @@ public class UserAreaActivity extends AppCompatActivity {
         String message = name + " welcome to your User Area";
         welcomeMessage.setText(message);
         etUsername.setText(username);
-        etPhone.setText(phone + "");
+        etPhone.setText("0" + phone);           // Concat a "0" to fit with UK & Ireland telephone numbers - may need to update for international
         etTownCity.setText(city);
         etCountry.setText(country);
         etEmailAddress.setText(email);

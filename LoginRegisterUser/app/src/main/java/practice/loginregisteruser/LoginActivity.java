@@ -1,4 +1,4 @@
-package mycompany.freecoffeev1;
+package practice.loginregisteruser;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -53,6 +53,7 @@ public class LoginActivity extends AppCompatActivity {
                             JSONObject jsonResponse = new JSONObject(response);
                             boolean success = jsonResponse.getBoolean("success");
 
+
                             if (success) {
                                 // Get data from JSONresponse from database
 
@@ -76,7 +77,7 @@ public class LoginActivity extends AppCompatActivity {
                                 LoginActivity.this.startActivity(intent);
                             } else {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-                                builder.setMessage("Register Failed")
+                                builder.setMessage("Login Failed")
                                         .setNegativeButton("Retry", null)
                                         .create()
                                         .show();
