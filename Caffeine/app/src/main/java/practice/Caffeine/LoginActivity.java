@@ -1,4 +1,4 @@
-package practice.loginregisteruser;
+package practice.Caffeine;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -67,14 +67,15 @@ public class LoginActivity extends AppCompatActivity {
                                 // Get data from JSONresponse from database
 
                                 String name = jsonResponse.getString("name");
-
+                                String userID = jsonResponse.getString("user_id");  // user_id is the name in the database but userID in app
                                 int phone = jsonResponse.getInt("phone");
                                 String country = jsonResponse.getString("country");
                                 String city = jsonResponse.getString("city");
                                 String email = jsonResponse.getString("email");
                                 // pass data below to UserAreaActivity
-                                Intent intent = new Intent(LoginActivity.this, UserAreaActivity.class);
+                                Intent intent = new Intent(LoginActivity.this, CoffeeShopsActivity.class);
                                 intent.putExtra("username", username);
+                                intent.putExtra("userID", userID);
                                 intent.putExtra("name", name);
                                 intent.putExtra("password", password);
                                 intent.putExtra("phone", phone);

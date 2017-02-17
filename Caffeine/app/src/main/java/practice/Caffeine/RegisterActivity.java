@@ -1,13 +1,13 @@
-package practice.loginregisteruser;
+package practice.Caffeine;
 
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -18,6 +18,11 @@ import com.android.volley.toolbox.Volley;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -61,6 +66,12 @@ public class RegisterActivity extends AppCompatActivity {
                 final int phone = Integer.parseInt(etPhone.getText().toString());
 
 
+                // stamps is a Map to record the String coffee shop and Integer cups. Integer cups will also hold the
+                final Map<String, Integer> stamps = new HashMap<String, Integer>();
+                stamps.put(" ",0);
+
+
+
                 Response.Listener<String> responseListener = new Response.Listener<String>() {
 
                     @Override
@@ -93,6 +104,8 @@ public class RegisterActivity extends AppCompatActivity {
                 RegisterRequest registerRequest = new RegisterRequest(responseListener, username, name, password, phone, city, country, email);
                 RequestQueue queue = Volley.newRequestQueue(RegisterActivity.this);
                 queue.add(registerRequest);
+
+
             }
         });
 
