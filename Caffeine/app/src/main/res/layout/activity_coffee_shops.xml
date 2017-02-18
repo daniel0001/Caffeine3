@@ -29,20 +29,15 @@
         android:id="@+id/tvCoffeeShopsTitle"
         android:textSize="20sp" />
 
-
-
-    <ListView
-        android:id="@+id/lvShopList"
-        android:paddingTop="30dp"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentEnd="true"
-        android:layout_below="@+id/tvCoffeeShopsTitle"
-        >
-
-
-    </ListView>
-
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPersonName"
+        android:text="Name"
+        android:ems="10"
+        android:layout_below="@id/tvCoffeeShopsTitle"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/etDBTest" />
 
 
 </RelativeLayout>

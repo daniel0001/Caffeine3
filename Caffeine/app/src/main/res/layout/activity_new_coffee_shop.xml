@@ -32,13 +32,22 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="textPostalAddress"
+        android:inputType="textPersonName"
+        android:text="@string/coffee_shop_name"
         android:ems="10"
-        android:layout_marginTop="46dp"
-        android:id="@+id/etCoffeeShopCity"
-        android:hint="@string/town_city"
+        android:id="@+id/etCoffeeShopName"
         android:layout_below="@+id/tvWifiSSID"
         android:layout_centerHorizontal="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textPostalAddress"
+        android:ems="10"
+        android:id="@+id/etCoffeeShopCity"
+        android:hint="@string/town_city"
+        android:layout_below="@+id/etCoffeeShopName"
+        android:layout_alignStart="@+id/etCoffeeShopName" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -49,15 +58,5 @@
         android:hint="@string/country"
         android:layout_below="@+id/etCoffeeShopCity"
         android:layout_alignStart="@+id/etCoffeeShopCity" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:text="@string/coffee_shop_name"
-        android:ems="10"
-        android:id="@+id/etCoffeeShopName"
-        android:layout_below="@+id/etCoffeeShopCountry"
-        android:layout_alignStart="@+id/etCoffeeShopCountry" />
 
 </RelativeLayout>
