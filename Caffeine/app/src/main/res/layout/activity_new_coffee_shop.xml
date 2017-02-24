@@ -8,36 +8,64 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="practice.Caffeine.NewCoffeeShop">
+    tools:context="practice.Caffeine.NewCoffeeShopActivity">
 
+
+    <TextView
+        android:text="@string/new_shop_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:id="@+id/tvRegisterTitle"
+        android:textSize="@dimen/large_text"
+        android:paddingBottom="20dp"/>
     <Button
         android:text="@string/create_coffee_shop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="106dp"
-        android:id="@+id/bCreateCoffeeShop" />
+        android:id="@+id/bCreateCoffeeShop"
+        android:layout_below="@+id/tvRegisterTitle"
+        android:layout_centerHorizontal="true" />
 
     <TextView
-        android:text="@string/wifi_SSID_check"
+        android:text="@string/new_shop_instructions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvInstructions"
+        android:layout_below="@+id/bCreateCoffeeShop"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="18dp" />
+
+    <EditText
+        android:hint="@string/wifi_SSID_check"
 
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="34dp"
-        android:id="@+id/tvWifiSSID" />
+        android:id="@+id/etWifiSSID"
+        android:layout_below="@+id/tvInstructions"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:text="@string/enter_details"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvEnterDetails"
+        android:textSize="@dimen/med_text"
+        android:paddingBottom="20dp"
+        android:layout_below="@+id/etWifiSSID"
+        android:layout_alignParentStart="true" />
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
-        android:text="@string/coffee_shop_name"
+        android:hint="@string/coffee_shop_name"
         android:ems="10"
         android:id="@+id/etCoffeeShopName"
-        android:layout_below="@+id/tvWifiSSID"
-        android:layout_centerHorizontal="true" />
+
+        android:layout_below="@+id/tvEnterDetails"
+        android:layout_alignParentStart="true" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -49,6 +77,7 @@
         android:layout_below="@+id/etCoffeeShopName"
         android:layout_alignStart="@+id/etCoffeeShopName" />
 
+
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -58,5 +87,6 @@
         android:hint="@string/country"
         android:layout_below="@+id/etCoffeeShopCity"
         android:layout_alignStart="@+id/etCoffeeShopCity" />
+
 
 </RelativeLayout>

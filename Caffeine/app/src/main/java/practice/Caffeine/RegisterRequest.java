@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class RegisterRequest extends StringRequest {
 
-    private static final String REGISTER_REQUEST_URL = "http://dunedinglobal.com/Register.php";
+    private static final String REGISTER_REQUEST_URL = "http://dunedinglobal.com/caffeine/Register.php";
 
     private Map<String, String> params;
 
