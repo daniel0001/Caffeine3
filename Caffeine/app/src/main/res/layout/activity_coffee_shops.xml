@@ -9,15 +9,6 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="practice.Caffeine.CoffeeShopsActivity">
-
-    <TextView
-        android:text="@string/shop_stamps"
-        android:layout_toStartOf="@id/bAddShop"
-        android:paddingTop="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:id="@+id/tvCoffeeShopsTitle"
-        android:textSize="20sp" />
     <Button
         android:text="@string/plus_sign"
         android:textSize="25sp"
@@ -27,6 +18,15 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
         android:id="@+id/bAddShop" />
+    <TextView
+        android:text="@string/shop_stamps"
+        android:layout_toStartOf="@id/bAddShop"
+        android:paddingTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:id="@+id/tvCoffeeShopsTitle"
+        android:textSize="20sp" />
+
 
 
     <android.support.v7.widget.RecyclerView
