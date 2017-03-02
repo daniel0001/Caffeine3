@@ -19,74 +19,76 @@
         android:layout_alignParentStart="true"
         android:id="@+id/tvRegisterTitle"
         android:textSize="@dimen/large_text"
-        android:paddingBottom="20dp"/>
-    <Button
-        android:text="@string/create_coffee_shop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/bCreateCoffeeShop"
-        android:layout_below="@+id/tvRegisterTitle"
-        android:layout_centerHorizontal="true" />
+        android:paddingBottom="20dp"
+        android:layout_alignParentEnd="true" />
+
 
     <TextView
         android:text="@string/new_shop_instructions"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/tvInstructions"
-        android:layout_below="@+id/bCreateCoffeeShop"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="18dp" />
-
-    <EditText
-        android:hint="@string/wifi_SSID_check"
-
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/etWifiSSID"
-        android:layout_below="@+id/tvInstructions"
+        android:layout_below="@+id/tvRegisterTitle"
         android:layout_alignParentStart="true" />
 
     <TextView
-        android:text="@string/enter_details"
+        android:hint="@string/wifi_SSID_check"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/tvEnterDetails"
+        android:id="@+id/tvWifiSSID"
+        android:layout_below="@+id/tvInstructions"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:text="@string/find_this_shop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/bPickPlace"
+        android:layout_below="@+id/tvWifiSSID"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:text="@string/shop_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvShopAddressTitle"
         android:textSize="@dimen/med_text"
-        android:paddingBottom="20dp"
-        android:layout_below="@+id/etWifiSSID"
-        android:layout_alignParentStart="true" />
+        android:textAlignment="viewStart"
+        android:layout_below="@+id/bPickPlace"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true" />
 
-    <EditText
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:hint="@string/coffee_shop_name"
         android:ems="10"
-        android:id="@+id/etCoffeeShopName"
+        android:id="@+id/tvShopName"
+        android:textAlignment="viewStart"
+        android:hint="@string/location_off"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/tvShopAddressTitle"
+        android:layout_alignParentEnd="true" />
 
-        android:layout_below="@+id/tvEnterDetails"
-        android:layout_alignParentStart="true" />
-
-    <EditText
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="textPostalAddress"
         android:ems="10"
-        android:id="@+id/etCoffeeShopCity"
-        android:hint="@string/town_city"
-        android:layout_below="@+id/etCoffeeShopName"
-        android:layout_alignStart="@+id/etCoffeeShopName" />
+        android:id="@+id/tvShopAddress"
+        android:textAlignment="viewStart"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/tvShopName"
+        android:layout_alignParentEnd="true" />
 
-
-    <EditText
+    <Button
+        android:text="@string/confirm_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:inputType="textPostalAddress"
-        android:ems="10"
-        android:id="@+id/etCoffeeShopCountry"
-        android:hint="@string/country"
-        android:layout_below="@+id/etCoffeeShopCity"
-        android:layout_alignStart="@+id/etCoffeeShopCity" />
+        android:layout_below="@+id/tvShopAddress"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="35dp"
+        android:id="@+id/btnAddShop"
+        />
 
 
 </RelativeLayout>

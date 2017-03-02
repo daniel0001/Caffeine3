@@ -16,16 +16,18 @@ public class NewCoffeeShopRequest extends StringRequest {
 
     private Map<String, String> params;
 
-    public NewCoffeeShopRequest(Response.Listener<String> listener, String userID, String shopName, String shopCity, String shopCountry, String wifiName) {
+    public NewCoffeeShopRequest(Response.Listener<String> listener, String shopName, String address, String wifiSSID, String lat, String lng, String shopWeb, String phoneNum, String userID, String placeID) {
         super(Method.POST, REGISTER_REQUEST_URL, listener, null);
         params = new HashMap<>();
-        params.put("userID", userID);
         params.put("shopName", shopName);
-        params.put("shopCity", shopCity);
-        params.put("shopCountry", shopCountry);
-        params.put("wifiName", wifiName);
-
-
+        params.put("address", address);
+        params.put("wifiSSID", wifiSSID);
+        params.put("lat", lat);
+        params.put("lng", lng);
+        params.put("shopWeb", shopWeb);
+        params.put("phoneNum", phoneNum);
+        params.put("userID", userID);
+        params.put("placeID", placeID);
 
     }
     public Map<String, String> getParams() {

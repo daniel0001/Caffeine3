@@ -12,7 +12,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public final class DatabaseHelper extends SQLiteOpenHelper{
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "UserDetails.db";
 
 
@@ -26,8 +26,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         public static final String COLUMN_NAME_NAME = "name";
         public static final String COLUMN_NAME_PASSWORD = "password";
         public static final String COLUMN_NAME_PHONE = "phone";
-        public static final String COLUMN_NAME_CITY = "city";
-        public static final String COLUMN_NAME_COUNTRY = "country";
+        public static final String COLUMN_NAME_LOCATIONID = "locationID";
         public static final String COLUMN_NAME_EMAIL = "email";
 
     private static final String SQL_CREATE_ENTRIES =
@@ -38,8 +37,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
                     COLUMN_NAME_NAME + " TEXT," +
                     COLUMN_NAME_PASSWORD + " TEXT," +
                     COLUMN_NAME_PHONE + " TEXT," +
-                    COLUMN_NAME_CITY + " TEXT," +
-                    COLUMN_NAME_COUNTRY + " TEXT," +
+                    COLUMN_NAME_LOCATIONID + " TEXT," +
                     COLUMN_NAME_EMAIL + " TEXT)";
 
     private static final String SQL_DELETE_ENTRIES =
@@ -65,7 +63,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
             onUpgrade(db, oldVersion, newVersion);
         }
 
-        public  boolean insertData(String username, String userID, String name, String password, Integer phone, String city, String country, String email){
+        public  boolean insertData(String username, String userID, String name, String password, Integer phone, Integer locationID, String email){
             SQLiteDatabase db = this.getWritableDatabase();
             ContentValues values = new ContentValues();
             values.put(COLUMN_NAME_USERNAME, username);
@@ -73,8 +71,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
             values.put(COLUMN_NAME_NAME , name);
             values.put(COLUMN_NAME_PASSWORD, password);
             values.put(COLUMN_NAME_PHONE, phone);
-            values.put(COLUMN_NAME_CITY, city);
-            values.put(COLUMN_NAME_COUNTRY, country);
+            values.put(COLUMN_NAME_LOCATIONID, locationID);
             values.put(COLUMN_NAME_EMAIL, email);
             long result = db.insert(TABLE_NAME, null, values);
             return result != -1;

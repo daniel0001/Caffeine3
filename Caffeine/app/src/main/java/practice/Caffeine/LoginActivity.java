@@ -22,14 +22,17 @@ import org.json.JSONObject;
 public class LoginActivity extends AppCompatActivity {
     DatabaseHelper myDB;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        /* To DO  Check that location is switched on and internet connected */
+
+
         // Create the DB
         myDB = new DatabaseHelper(this);
-
         final EditText etUsername = (EditText) findViewById(R.id.etUsername);
         final EditText etPassword = (EditText) findViewById(R.id.etPassword);
         final Button bLogin = (Button) findViewById(R.id.bLogin);
@@ -57,8 +60,6 @@ public class LoginActivity extends AppCompatActivity {
                     return;         // if not completed return to start
                 }
 
-
-
                 Response.Listener<String> responseListener = new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -67,25 +68,21 @@ public class LoginActivity extends AppCompatActivity {
                             JSONObject jsonResponse = new JSONObject(response);
                             boolean success = jsonResponse.getBoolean("success");
 
-
                             if (success) {
                                 // Get data from JSONresponse from database
-
                                 String name = jsonResponse.getString("name");
                                 String userID = jsonResponse.getString("user_id");  // user_id is the name in the database but userID in app
                                 int phone = jsonResponse.getInt("phone");
-                                String country = jsonResponse.getString("country");
-                                String city = jsonResponse.getString("city");
+                                int locationID = jsonResponse.getInt("location_id");
                                 String email = jsonResponse.getString("email");
 
-
                                 // Enter Data into SQLite DB 'myDB'
-                               boolean isInserted =  myDB.insertData(username, userID, name, password, phone, city, country, email);
+                               boolean isInserted =  myDB.insertData(username, userID, name, password, phone, locationID, email);
                                 if(isInserted){
                                     Toast.makeText(LoginActivity.this,"Data Inserted", Toast.LENGTH_LONG).show();
-                                } else {
+                                    } else {
                                     Toast.makeText(LoginActivity.this,"Data not Inserted", Toast.LENGTH_LONG).show();
-                                }
+                                    }
 
                                 // Set up new intent CoffeeShopsActivity
                                 Intent intent = new Intent(LoginActivity.this, CoffeeShopsActivity.class);
@@ -116,6 +113,9 @@ public class LoginActivity extends AppCompatActivity {
 
 
     }
+
+
+
 
     }
 
