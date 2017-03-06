@@ -5,8 +5,9 @@
 
     <dimen name="large_text">18sp</dimen>
     <dimen name="med_text">16sp</dimen>
-    <dimen name="small_text">14sp</dimen>
-    <dimen name="table_title_row_height">50sp</dimen>"
-    <dimen name="table_row_height">50sp</dimen>"
+    "
+    "
+
+    <dimen name="detail_backdrop_height">250dp</dimen>
 
 </resources>

@@ -12,26 +12,24 @@
     <string name="email_address">Email Address</string>
     <string name="user_details">User Details</string>
     <string name="register">Register</string>
-    <string name="test">test</string>
-    <string name="UKI_local_zero_start_phone_number">0</string>
-    <string name="request_user_info">Please complete the user info</string>
-    <string name="shop_stamps">Coffee Shop Stamps</string>
-    <string name="cups">Cups</string>
+
     <string name="plus_sign">+</string>
-    <string name="create_coffee_shop">Register New Shop</string>
     <string name="wifi_SSID_check">Please switch on your wifi</string>
-    <string name="coffee_shop_name">Coffee Shop Name</string>
     <string name="new_shop_title">New Coffee Shop</string>
-    <string name="wifi_off">Please switch on your Wifi</string>
     <string name="location_off">Please switch on your location services</string>
     <string name="new_shop_instructions">Please make sure that this is the correct wifi name for the Coffee Shop that you are currently in. Check with a staff member if unsure.</string>
     <string name="shop_address">Shop Address</string>
     <string name="find_this_shop">Find Shop</string>
-    <string name="title_activity_maps">Map</string>
     <string name="confirm_button">Add to My Shops</string>
     <string name="gps_network_not_enabled">GPS  network not enabled</string>
     <string name="open_location_settings">Open Location Settings</string>
     <string name="Cancel">Cancel</string>
+
+
+    <string name="action_add_favourite">Add to Favourites</string>
+    <string name="action_play_next">Play Next</string>
+    <string name="backdrop_title">LOVE COFFEE</string>
+    <string name="backdrop_subtitle">My Loyalty Points</string>
 
 
 </resources>
