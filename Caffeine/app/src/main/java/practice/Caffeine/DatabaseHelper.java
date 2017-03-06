@@ -29,6 +29,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         public static final String COLUMN_NAME_LOCATIONID = "locationID";
         public static final String COLUMN_NAME_EMAIL = "email";
 
+
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + TABLE_NAME + " (" +
                     _ID + " INTEGER PRIMARY KEY," +
