@@ -86,7 +86,6 @@
         app:layout_anchor="@+id/include"
         app:layout_anchorGravity="bottom|center_horizontal" />
 
-
 </android.support.design.widget.CoordinatorLayout>
 
 
