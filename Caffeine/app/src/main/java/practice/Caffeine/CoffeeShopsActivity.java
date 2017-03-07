@@ -141,17 +141,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         a = new Shop("Westlife", 1, covers[5]);
         shopList.add(a);
 
-        a = new Shop("Black Eyed Peas", 11, covers[6]);
-        shopList.add(a);
 
-        a = new Shop("VivaLaVida", 14, covers[7]);
-        shopList.add(a);
-
-        a = new Shop("The Cardigans", 11, covers[8]);
-        shopList.add(a);
-
-        a = new Shop("Pussycat Dolls", 17, covers[9]);
-        shopList.add(a);
 
         adapter.notifyDataSetChanged();
     }

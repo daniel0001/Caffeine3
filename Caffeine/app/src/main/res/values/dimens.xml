@@ -5,9 +5,21 @@
 
     <dimen name="large_text">18sp</dimen>
     <dimen name="med_text">16sp</dimen>
-    "
-    "
 
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="item_offset">10dp</dimen>
     <dimen name="detail_backdrop_height">250dp</dimen>
+    <dimen name="backdrop_title">30dp</dimen>
+    <dimen name="backdrop_subtitle">18dp</dimen>
+    <dimen name="shop_margin">5dp</dimen>
+    <dimen name="card_shop_radius">0dp</dimen>
+    <dimen name="shop_cover_height">160dp</dimen>
+    <dimen name="shop_title_padding">10dp</dimen>
+    <dimen name="shop_title">15dp</dimen>
+    <dimen name="visit_count_padding_bottom">5dp</dimen>
+    <dimen name="visit_count">12dp</dimen>
+    <dimen name="ic_album_overflow_width">20dp</dimen>
+    <dimen name="ic_album_overflow_height">30dp</dimen>
+    <dimen name="ic_album_overflow_margin_top">10dp</dimen>
 
 </resources>

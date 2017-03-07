@@ -30,7 +30,8 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".CoffeeShopsActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".NewCoffeeShopActivity" />
         <!--
  ATTENTION: This was auto-generated to add Google Play services to your project for

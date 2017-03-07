@@ -27,7 +27,9 @@
 
 
     <string name="action_add_favourite">Add to Favourites</string>
+    // change this
     <string name="action_play_next">Play Next</string>
+    // change this
     <string name="backdrop_title">LOVE COFFEE</string>
     <string name="backdrop_subtitle">My Loyalty Points</string>
 
