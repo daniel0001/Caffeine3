@@ -31,11 +31,6 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.FileNotFoundException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Scanner;
-
 
 public class NewCoffeeShopActivity extends AppCompatActivity {
 
@@ -47,12 +42,13 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
     private TextView tvWifiSSID;
     private TextView tvShopAddress;
     private String wifiSSID;
+    private String wifiMAC;
     private String shopWeb;
     private String lat;
     private String lng;
     private String phoneNum;
     private String placeID;
-    private ArrayList<Shop> shopList;
+
     private int PLACE_PICKER_REQUEST = 1;
 
     @Override
@@ -68,9 +64,9 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
         tvShopName = (TextView) findViewById(R.id.tvShopName);
         tvShopAddress = (TextView) findViewById(R.id.tvShopAddress);
         wifiSSID = null;
-        // Store shops to file
-        shopList = new ArrayList<>();
-        populateList(shopList);
+        wifiMAC = null;
+        // Store shops to shopDB SQLite
+
 
 
         // get the current logged in wifi SSID and display in tvWifiSSID
@@ -79,6 +75,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
         wifiInfo = wifiManager.getConnectionInfo();
         if (wifiInfo.getSupplicantState() == SupplicantState.COMPLETED) {
             wifiSSID = wifiInfo.getSSID();
+            wifiMAC = wifiInfo.getMacAddress();
         }
         tvWifiSSID.setText(wifiSSID);
 
@@ -160,7 +157,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                             // if not completed return to start
                             return;
                         }
-                        if (shopList.contains(shopName)) {
+                        if (/* shopTable */  .contains(shopName)){
                             Toast.makeText(NewCoffeeShopActivity.this, "Shop already registered in your list - please 'Find Shop' again or go back to list", Toast.LENGTH_LONG).show();
                             return;
                         }
@@ -188,8 +185,9 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                                     String name = shopName.getText().toString();
 
                                     Shop shop = new Shop(name, 1, 0);
-                                    shopList.add(shop);
-                                    writeToFile(shopList);
+
+                                    // To-do ***Add shop to SQLite Database here****
+
 
                                         Intent nextIntent = new Intent(NewCoffeeShopActivity.this, CoffeeShopsActivity.class);
                                         nextIntent.putExtra("userID", userID);
@@ -202,7 +200,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                             }
 
                         };
-                        NewCoffeeShopRequest newCoffeeShopRequest = new NewCoffeeShopRequest(responseListener, shopName, address, wifiName, lat, lng, shopWeb, phoneNum, userID, placeID);
+                        NewCoffeeShopRequest newCoffeeShopRequest = new NewCoffeeShopRequest(responseListener, shopName, address, wifiName, wifiMAC, lat, lng, shopWeb, phoneNum, userID, placeID);
                         RequestQueue queue = Volley.newRequestQueue(NewCoffeeShopActivity.this);
                         queue.add(newCoffeeShopRequest);
 
@@ -212,36 +210,6 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
 
     }
 
-    private ArrayList<Shop> populateList(ArrayList<Shop> list) {
-        Scanner scan = new Scanner(getResources().openRawResource(R.raw.myshoplist));
-        while (scan.hasNextLine()) {
-            String line = scan.nextLine();
-            int i = line.indexOf(",");
-            int j = line.indexOf(",", i);
-            String name = line.substring(0, i);
-            String visits = line.substring(i + 1, j);   // convert to int
-            String thumbnail = line.substring(j + 1, line.length()); // convert to int
-            Shop shop = new Shop(name, visits, thumbnail);
-            list.add(shop);
-        }
-        scan.close();
-        return list;
-    }
-
-    // write shopList to file
-    private void writeToFile(ArrayList<Shop> list) {
-        PrintStream out = null;
-        try {
-            out = new PrintStream(openFileOutput("raw/myshoplist.txt", MODE_PRIVATE));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        for (int i = 0; i < list.size(); i++) {
-            Shop shop = list.get(i);
-            out.println(shop);
-        }
-        out.close();
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {

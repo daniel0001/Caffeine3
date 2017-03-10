@@ -20,7 +20,6 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
-import java.util.Scanner;
 
 
 public class CoffeeShopsActivity extends AppCompatActivity {
@@ -167,18 +166,9 @@ public class CoffeeShopsActivity extends AppCompatActivity {
     }
 
     private ArrayList<Shop> populateList(ArrayList<Shop> list) {
-        Scanner scan = new Scanner(getResources().openRawResource(R.raw.myshoplist));
-        while (scan.hasNextLine()) {
-            String line = scan.nextLine();
-            int i = line.indexOf(",");
-            int j = line.indexOf(",", i);
-            String name = line.substring(0, i);
-            String visits = line.substring(i + 1, j);   // convert to int
-            String thumbnail = line.substring(j + 1, line.length()); // convert to int
-            Shop shop = new Shop(name, visits, thumbnail);
-            list.add(shop);
-        }
-        scan.close();
+
+        // Populate from SQLite database
+
         return list;
     }
 

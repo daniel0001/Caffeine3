@@ -89,9 +89,9 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> 
     /**
      * Click listener for popup menu items
      */
-    class MyMenuItemClickListener implements PopupMenu.OnMenuItemClickListener {
+    private class MyMenuItemClickListener implements PopupMenu.OnMenuItemClickListener {
 
-        public MyMenuItemClickListener() {
+        private MyMenuItemClickListener() {
         }
 
         @Override

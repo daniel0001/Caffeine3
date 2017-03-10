@@ -1,6 +1,7 @@
 package practice.Caffeine;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -18,15 +19,24 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+
 
 /**
  * Created by Daniel on 06/02/2017.
  */
 public class RegisterActivity extends AppCompatActivity {
+    private DatabaseHelper myDB;
 
-    EditText etCountry;
-
-    private static final int MY_PERMISSION_REQUEST_LOCATION = 1;
+    /**
+     * Check if the database exist and can be read.
+     *
+     * @return true if it exists and can be read, false if it doesn't
+     */
+    private static boolean doesDatabaseExist(Context context, String dbName) {
+        File dbFile = context.getDatabasePath(dbName);
+        return dbFile.exists();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,10 +52,10 @@ public class RegisterActivity extends AppCompatActivity {
         final EditText etEmailAddress = (EditText) findViewById(R.id.etEmailAddress);
         final Button bRegister = (Button) findViewById(R.id.bRegister);
 
+        myDB = new DatabaseHelper(RegisterActivity.this);
 
 
-
-    bRegister.setOnClickListener(new View.OnClickListener()
+        bRegister.setOnClickListener(new View.OnClickListener()
     {
         @Override
         public void onClick (View v){
@@ -80,6 +90,8 @@ public class RegisterActivity extends AppCompatActivity {
                     JSONObject jsonResponse = new JSONObject(response);
                     boolean usernameExists = jsonResponse.getBoolean("usernameExists");
                     boolean locationExists = jsonResponse.getBoolean("locationExists");
+                    Integer userID = jsonResponse.getInt("userID");
+                    Integer locationID = jsonResponse.getInt("locationID");
 
                     if(usernameExists) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(RegisterActivity.this);
@@ -98,6 +110,14 @@ public class RegisterActivity extends AppCompatActivity {
                     }
 
                     if (!usernameExists && locationExists) {
+                        //check if myDB already exists
+                        String dbName = "myDB.db";
+                        Boolean myDBExists = doesDatabaseExist(RegisterActivity.this, getDatabasePath(DatabaseHelper.databasePath).toString());
+                        if (!myDBExists) {
+                            myDB.getWritableDatabase();
+                            myDB.insertDataUserTable(username, userID, name, password, phone, locationID, email);
+                        }
+
                         Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                         RegisterActivity.this.startActivity(intent);
                     }

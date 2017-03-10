@@ -1,5 +1,6 @@
 package practice.Caffeine;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -18,10 +19,21 @@ import com.android.volley.toolbox.Volley;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+
 
 public class LoginActivity extends AppCompatActivity {
     DatabaseHelper myDB;
 
+    /**
+     * Check if the database exist and can be read.
+     *
+     * @return true if it exists and can be read, false if it doesn't
+     */
+    private static boolean doesDatabaseExist(Context context, String dbName) {
+        File dbFile = context.getDatabasePath(dbName);
+        return dbFile.exists();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,20 +81,27 @@ public class LoginActivity extends AppCompatActivity {
                             boolean success = jsonResponse.getBoolean("success");
 
                             if (success) {
+
                                 // Get data from JSONresponse from database
                                 String name = jsonResponse.getString("name");
-                                String userID = jsonResponse.getString("user_id");  // user_id is the name in the database but userID in app
+                                Integer userID = jsonResponse.getInt("user_id");  // user_id is the name in the database but userID in app
                                 int phone = jsonResponse.getInt("phone");
                                 int locationID = jsonResponse.getInt("location_id");
                                 String email = jsonResponse.getString("email");
 
-                                // Enter Data into SQLite DB 'myDB'
-                               boolean isInserted =  myDB.insertData(username, userID, name, password, phone, locationID, email);
-                                if(isInserted){
-                                    Toast.makeText(LoginActivity.this,"Data Inserted", Toast.LENGTH_LONG).show();
+                                // If myDB exists Enter Data into SQLite DB 'myDB'
+                                String dbName = "myDB.db";
+                                Boolean myDBExists = doesDatabaseExist(LoginActivity.this, getDatabasePath(DatabaseHelper.databasePath).toString());
+                                if (!myDBExists) {
+                                    myDB.getWritableDatabase();
+                                    boolean isInserted = myDB.insertDataUserTable(username, userID, name, password, phone, locationID, email);
+                                    if (isInserted) {
+                                        Toast.makeText(LoginActivity.this, "Data Inserted", Toast.LENGTH_LONG).show();
                                     } else {
-                                    Toast.makeText(LoginActivity.this,"Data not Inserted", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(LoginActivity.this, "Data not Inserted", Toast.LENGTH_LONG).show();
                                     }
+
+                                }
 
                                 // Set up new intent CoffeeShopsActivity
                                 Intent intent = new Intent(LoginActivity.this, CoffeeShopsActivity.class);
@@ -113,7 +132,6 @@ public class LoginActivity extends AppCompatActivity {
 
 
     }
-
 
 
 
