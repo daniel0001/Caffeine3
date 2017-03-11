@@ -5,17 +5,40 @@ package practice.Caffeine;
  */
 
 public class Shop {
+    private int shopID;
     private String name;
-    private int numOfVisits;
-    private int thumbnail;
+    private String address;
+    private String website;
+    private Float lat;
+    private Float lng;
+    private String placeID;
+    private String wifiMAC;
+    private String wifiSSID;
 
     public Shop() {
     }
 
-    public Shop(String name, int numOfVisits, int thumbnail) {
+
+    public Shop(int shopID, String name, String address, String website, Float lat, Float lng, String placeID, String wifiMac, String wifiSSID) {
+        super();
+        this.shopID = shopID;
         this.name = name;
-        this.numOfVisits = numOfVisits;
-        this.thumbnail = thumbnail;
+        this.address = address;
+        this.website = website;
+        this.lat = lat;
+        this.lng = lng;
+        this.placeID = placeID;
+        this.wifiMAC = wifiMac;
+        this.wifiSSID = wifiSSID;
+
+    }
+
+    public int getShopID() {
+        return shopID;
+    }
+
+    public void setID(int ID) {
+        this.shopID = shopID;
     }
 
     public String getName() {
@@ -26,19 +49,75 @@ public class Shop {
         this.name = name;
     }
 
-    public int getNumOfVisits() {
-        return numOfVisits;
+    public String getAddress() {
+        return address;
     }
 
-    public void setNumOfVisits(int numOfSongs) {
-        this.numOfVisits = numOfSongs;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
-    public int getThumbnail() {
-        return thumbnail;
+    public String getWebsite() {
+        return website;
     }
 
-    public void setThumbnail(int thumbnail) {
-        this.thumbnail = thumbnail;
+    public void setWebsite(String website) {
+        this.website = website;
     }
+
+    public Float getLat() {
+        return lat;
+    }
+
+    public void setLat(Float lat) {
+        this.lat = lat;
+    }
+
+    public Float getLng() {
+        return lng;
+    }
+
+    public void setLng(Float lng) {
+        this.lng = lng;
+    }
+
+    public String getPlaceID() {
+        return placeID;
+    }
+
+    public void setPlaceID(String placeID) {
+        this.placeID = placeID;
+    }
+
+    public String getWifiMAC() {
+        return wifiMAC;
+    }
+
+    public void setWifiMAC(String wifiMAC) {
+        this.wifiMAC = wifiMAC;
+    }
+
+    public String getWifiSSID() {
+        return wifiSSID;
+    }
+
+    public void setWifiSSID(String wifiSSID) {
+        this.wifiSSID = wifiSSID;
+    }
+
+    @Override
+    public String toString() {
+        return "Shop{" +
+                "shopID=" + shopID +
+                ", name='" + name + '\'' +
+                ", address='" + address + '\'' +
+                ", website='" + website + '\'' +
+                ", lat=" + lat +
+                ", lng=" + lng +
+                ", placeID='" + placeID + '\'' +
+                ", wifiMAC='" + wifiMAC + '\'' +
+                ", wifiSSID='" + wifiSSID + '\'' +
+                '}';
+    }
+
 }

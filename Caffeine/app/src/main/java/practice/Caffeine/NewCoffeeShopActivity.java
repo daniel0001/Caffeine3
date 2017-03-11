@@ -66,7 +66,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
         wifiSSID = null;
         wifiMAC = null;
         // Store shops to shopDB SQLite
-
+        final DatabaseHelper myDB = new DatabaseHelper(this);
 
 
         // get the current logged in wifi SSID and display in tvWifiSSID
@@ -157,7 +157,12 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                             // if not completed return to start
                             return;
                         }
-                        if (/* shopTable */  .contains(shopName)){
+
+                        myDB.getReadableDatabase();
+                        String shopTable = "shops";
+
+
+                        if (myDB. (shopTable, shopName, address)){
                             Toast.makeText(NewCoffeeShopActivity.this, "Shop already registered in your list - please 'Find Shop' again or go back to list", Toast.LENGTH_LONG).show();
                             return;
                         }
