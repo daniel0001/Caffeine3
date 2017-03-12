@@ -20,14 +20,13 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class CoffeeShopsActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private ShopAdapter adapter;
-    private List<Shop> shopList;
+    private ArrayList<Shop> shopList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +40,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
         shopList = new ArrayList<>();
+        populateList(shopList);
         adapter = new ShopAdapter(this, shopList);
 
         RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this, 2);
@@ -115,6 +115,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
      */
     private void prepareShops() {
         int[] covers = new int[]{
+                R.drawable.addshop,
                 R.drawable.shop1,
                 R.drawable.shop2,
                 R.drawable.shop3,
@@ -123,25 +124,35 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                 R.drawable.shop6,
         };
 
-        Shop a = new Shop("Cafe Bon Bon", 9, covers[0]);
+        Shop a = new Shop("Add New Coffee Shop", 0, covers[0]);
         shopList.add(a);
 
         a = new Shop("Sugar Ray", 8, covers[1]);
         shopList.add(a);
 
-        a = new Shop("Bon Jovi", 11, covers[2]);
+        a = new Shop("Tanseys", 11, covers[2]);
         shopList.add(a);
 
-        a = new Shop("The Corrs", 12, covers[3]);
+        a = new Shop("The Coffee Lounge", 12, covers[3]);
         shopList.add(a);
 
-        a = new Shop("The Cranberries", 14, covers[4]);
+        a = new Shop("The Coffee Mill", 14, covers[4]);
         shopList.add(a);
 
-        a = new Shop("Westlife", 1, covers[5]);
+        a = new Shop("Bistro 54", 1, covers[5]);
         shopList.add(a);
 
+        a = new Shop("Chill", 11, covers[2]);
+        shopList.add(a);
 
+        a = new Shop("The Coffee Stop", 12, covers[3]);
+        shopList.add(a);
+
+        a = new Shop("BB's muffins", 14, covers[4]);
+        shopList.add(a);
+
+        a = new Shop("Add Shop", 1, covers[5]);
+        shopList.add(a);
 
         adapter.notifyDataSetChanged();
     }
@@ -152,6 +163,13 @@ public class CoffeeShopsActivity extends AppCompatActivity {
     private int dpToPx(int dp) {
         Resources r = getResources();
         return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
+    }
+
+    private ArrayList<Shop> populateList(ArrayList<Shop> list) {
+
+        // Populate from SQLite database
+
+        return list;
     }
 
     /**
@@ -191,6 +209,5 @@ public class CoffeeShopsActivity extends AppCompatActivity {
             }
         }
     }
-
 
 }

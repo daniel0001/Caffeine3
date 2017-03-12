@@ -42,6 +42,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
     private TextView tvWifiSSID;
     private TextView tvShopAddress;
     private String wifiSSID;
+    private String wifiMAC;
     private String shopWeb;
     private String lat;
     private String lng;
@@ -63,6 +64,9 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
         tvShopName = (TextView) findViewById(R.id.tvShopName);
         tvShopAddress = (TextView) findViewById(R.id.tvShopAddress);
         wifiSSID = null;
+        wifiMAC = null;
+        // Store shops to shopDB SQLite
+        final DatabaseHelper myDB = new DatabaseHelper(this);
 
 
         // get the current logged in wifi SSID and display in tvWifiSSID
@@ -71,6 +75,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
         wifiInfo = wifiManager.getConnectionInfo();
         if (wifiInfo.getSupplicantState() == SupplicantState.COMPLETED) {
             wifiSSID = wifiInfo.getSSID();
+            wifiMAC = wifiInfo.getMacAddress();
         }
         tvWifiSSID.setText(wifiSSID);
 
@@ -148,11 +153,19 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                         final String address = tvShopAddress.getText().toString();
                         // Check if the editext fields are empty and return if so
                         if (shopName.length() == 0 || address.length() == 0) {
-                            Toast.makeText(NewCoffeeShopActivity.this, "If your shop isn't displayed on the list please 'Find Shop' again", Toast.LENGTH_LONG).show();
+                            Toast.makeText(NewCoffeeShopActivity.this, "No shop name or shop adress - please 'Find Shop' again", Toast.LENGTH_LONG).show();
                             // if not completed return to start
                             return;
                         }
 
+                        myDB.getReadableDatabase();
+                        String shopTable = "shops";
+
+
+                        if (myDB. (shopTable, shopName, address)){
+                            Toast.makeText(NewCoffeeShopActivity.this, "Shop already registered in your list - please 'Find Shop' again or go back to list", Toast.LENGTH_LONG).show();
+                            return;
+                        }
                         //Create a response listener
                         Response.Listener<String> responseListener = new Response.Listener<String>() {
 
@@ -164,18 +177,27 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                                     JSONObject jsonResponse = new JSONObject(response);
                                     boolean shopExists = jsonResponse.getBoolean("shopExists");
                                     if (shopExists) {
+                                        Toast.makeText(NewCoffeeShopActivity.this, "Shop added to your Love Coffee cards.", Toast.LENGTH_LONG).show();
+                                    } else {
                                         AlertDialog.Builder builder = new AlertDialog.Builder(NewCoffeeShopActivity.this);
-                                        builder.setMessage("It looks like this shop is already registered.")
-                                                .setNegativeButton("Retry", null)
+                                        builder.setMessage("Yay! It looks like you are the first person to register this shop for Love Coffee. That's great - but we will have to check if they accept 'Love Coffee' loyalty points. Please check with a member of staff. If they are curious they can visit www.lovecoffee.ie for merchant details.")
+                                                .setNegativeButton("Ok", null)
                                                 .create()
                                                 .show();
-                                        return;
-                                    } else {
+                                    }
+                                    // Write shop details to file and start NewCoffeeShopActivity
+                                    TextView shopName = (TextView) findViewById(R.id.tvShopName);
+                                    String name = shopName.getText().toString();
+
+                                    Shop shop = new Shop(name, 1, 0);
+
+                                    // To-do ***Add shop to SQLite Database here****
+
+
                                         Intent nextIntent = new Intent(NewCoffeeShopActivity.this, CoffeeShopsActivity.class);
                                         nextIntent.putExtra("userID", userID);
                                         nextIntent.putExtra("name", name);
                                         NewCoffeeShopActivity.this.startActivity(nextIntent);
-                                    }
 
                                 } catch (JSONException e) {
                                     e.printStackTrace();
@@ -183,7 +205,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                             }
 
                         };
-                        NewCoffeeShopRequest newCoffeeShopRequest = new NewCoffeeShopRequest(responseListener, shopName, address, wifiName, lat, lng, shopWeb, phoneNum, userID, placeID);
+                        NewCoffeeShopRequest newCoffeeShopRequest = new NewCoffeeShopRequest(responseListener, shopName, address, wifiName, wifiMAC, lat, lng, shopWeb, phoneNum, userID, placeID);
                         RequestQueue queue = Volley.newRequestQueue(NewCoffeeShopActivity.this);
                         queue.add(newCoffeeShopRequest);
 
@@ -192,6 +214,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                 });
 
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
