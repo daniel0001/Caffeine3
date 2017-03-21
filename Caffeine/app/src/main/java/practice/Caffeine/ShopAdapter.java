@@ -24,9 +24,9 @@ import java.util.List;
 public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> {
 
     private Context mContext;
-    private List<Shop> shopList;
+    private List<ShopCard> shopList;
 
-    public ShopAdapter(Context mContext, List<Shop> shopList) {
+    public ShopAdapter(Context mContext, List<ShopCard> shopList) {
         this.mContext = mContext;
         this.shopList = shopList;
     }
@@ -41,12 +41,13 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> 
 
     @Override
     public void onBindViewHolder(final MyViewHolder holder, int position) {
-        Shop shop = shopList.get(position);
-        holder.title.setText(shop.getName());
-        holder.count.setText(shop.getNumOfVisits() + " visits");
 
-        // loading shop cover using Glide library
-        Glide.with(mContext).load(shop.getThumbnail()).into(holder.thumbnail);
+        ShopCard shopCard = shopList.get(position);
+        holder.title.setText(shopCard.getName());
+        holder.count.setText(shopCard.getNumOfVisits() + " visits");
+
+        // loading shop card using Glide library
+        Glide.with(mContext).load(shopCard.getShopImage()).into(holder.thumbnail);
 
         holder.overflow.setOnClickListener(new View.OnClickListener() {
             @Override

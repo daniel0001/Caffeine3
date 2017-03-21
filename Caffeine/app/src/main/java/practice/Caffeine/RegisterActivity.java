@@ -67,19 +67,13 @@ public class RegisterActivity extends AppCompatActivity {
         final String city = etTownCity.getText().toString();
         final String email = etEmailAddress.getText().toString();
 
-        final String phoneNum = etPhone.getText().toString();
+            final String phone = etPhone.getText().toString();
 
         // Check that all of the edit text fields have been completed
-        if (name.length() == 0 || username.length() == 0 || password.length() == 0 || country.length() == 0 || city.length() == 0 || email.length() == 0 || phoneNum.length() == 0) {
+            if (name.length() == 0 || username.length() == 0 || password.length() == 0 || country.length() == 0 || city.length() == 0 || email.length() == 0 || phone.length() == 0) {
             Toast.makeText(RegisterActivity.this, "Please complete all of the user info.", Toast.LENGTH_LONG).show();
             return;         // if not completed return to start
         }
-
-        final int phone = Integer.parseInt(etPhone.getText().toString());
-
-
-
-
 
         Response.Listener<String> responseListener = new Response.Listener<String>() {
 
@@ -115,7 +109,15 @@ public class RegisterActivity extends AppCompatActivity {
                         Boolean myDBExists = doesDatabaseExist(RegisterActivity.this, getDatabasePath(DatabaseHelper.databasePath).toString());
                         if (!myDBExists) {
                             myDB.getWritableDatabase();
-                            myDB.insertDataUserTable(username, userID, name, password, phone, locationID, email);
+                            User user = new User();
+                            user.setUsername(username);
+                            user.setUserID(userID);
+                            user.setName(name);
+                            user.setEmail(email);
+                            user.setLocationID(locationID);
+                            user.setPassword(password);
+                            user.setPhone(phone);
+                            myDB.addUser(user);
                         }
 
                         Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);

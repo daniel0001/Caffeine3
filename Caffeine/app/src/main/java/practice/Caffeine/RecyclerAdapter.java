@@ -1,6 +1,7 @@
 package practice.Caffeine;
 
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -21,13 +22,12 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHo
     public RecyclerAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
                                                          int viewType) {
         // create a new view
-        // TextView v = (TextView) LayoutInflater.from(parent.getContext())
-        //          .inflate(R.layout.my_text_view, parent, false);
+        TextView v = (TextView) LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.shop_card, parent, false);
         // set the view's size, margins, paddings and layout parameters
+        ViewHolder vh = new ViewHolder(v);
+        return vh;
 
-        //   ViewHolder vh = new ViewHolder(v);
-        //  return vh;
-        return null;
     }
 
     // Replace the contents of a view (invoked by the layout manager)

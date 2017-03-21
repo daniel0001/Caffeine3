@@ -35,7 +35,7 @@ import org.json.JSONObject;
 public class NewCoffeeShopActivity extends AppCompatActivity {
 
     private String name;
-    private String userID;
+    private Integer userID;
     private Button btnPlacePicker;
     private Button btnAddShop;
     private TextView tvShopName;
@@ -46,8 +46,10 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
     private String shopWeb;
     private String lat;
     private String lng;
-    private String phoneNum;
+    private String phone;
     private String placeID;
+    private int shopID;
+
 
     private int PLACE_PICKER_REQUEST = 1;
 
@@ -57,7 +59,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
         setContentView(R.layout.activity_new_coffee_shop);
         final Intent intent = getIntent();
         name = intent.getStringExtra("name");
-        userID = intent.getStringExtra("userID");
+        userID = intent.getIntExtra("userID", 0);
         btnPlacePicker = (Button) findViewById(R.id.bPickPlace);
         btnAddShop = (Button) findViewById(R.id.btnAddShop);
         tvWifiSSID = (TextView) findViewById(R.id.tvWifiSSID);
@@ -65,9 +67,9 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
         tvShopAddress = (TextView) findViewById(R.id.tvShopAddress);
         wifiSSID = null;
         wifiMAC = null;
+
         // Store shops to shopDB SQLite
         final DatabaseHelper myDB = new DatabaseHelper(this);
-
 
         // get the current logged in wifi SSID and display in tvWifiSSID
         WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -82,7 +84,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
         // when addCoffeeShop clicked, add the name of the Coffee Shop, wifi SSID, Time and Address to the table corresponding to the user_id
         // then start the Coffee Shop activity
 
-        final String wifiName = wifiSSID.replaceAll("^\"|\"$", "");
+        // final String wifiName = wifiSSID.replaceAll("^\"|\"$", "");
 
         // Check if location services and network connected
         LocationManager lm = (LocationManager) NewCoffeeShopActivity.this.getSystemService(Context.LOCATION_SERVICE);
@@ -117,14 +119,10 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface paramDialogInterface, int paramInt) {
                     // TODO Auto-generated method stub
-
                 }
             });
             dialog.show();
         }
-
-        // To Do Hide buttons if no location or network connected
-
 
         // btnPlacePicker.onPickButtonClick();
 
@@ -158,14 +156,6 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                             return;
                         }
 
-                        myDB.getReadableDatabase();
-                        String shopTable = "shops";
-
-
-                        if (myDB. (shopTable, shopName, address)){
-                            Toast.makeText(NewCoffeeShopActivity.this, "Shop already registered in your list - please 'Find Shop' again or go back to list", Toast.LENGTH_LONG).show();
-                            return;
-                        }
                         //Create a response listener
                         Response.Listener<String> responseListener = new Response.Listener<String>() {
 
@@ -185,19 +175,31 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                                                 .create()
                                                 .show();
                                     }
-                                    // Write shop details to file and start NewCoffeeShopActivity
-                                    TextView shopName = (TextView) findViewById(R.id.tvShopName);
-                                    String name = shopName.getText().toString();
+                                    myDB.getWritableDatabase();
+                                    Shop newShop = new Shop();
 
-                                    Shop shop = new Shop(name, 1, 0);
+                                    //  SHOPS_COLUMNS = {_ID, COLUMN_NAME_SHOPID, COLUMN_NAME_NAME, COLUMN_NAME_ADDRESS, COLUMN_NAME_WEBSITE, COLUMN_NAME_LAT, COLUMN_NAME_LNG, COLUMN_NAME_PLACEID, COLUMN_NAME_WIFIMAC, COLUMN_NAME_WIFISSID};
+                                    shopID = jsonResponse.getInt("shop_ID");
+                                    newShop.setShopID(shopID);
+                                    newShop.setName(shopName);
+                                    newShop.setAddress(address);
+                                    newShop.setWebsite(shopWeb);
+                                    newShop.setLat(lat);
+                                    newShop.setLng(lng);
+                                    newShop.setPlaceID(placeID);
+                                    newShop.setWifiMAC(wifiMAC);
+                                    newShop.setWifiSSID(wifiSSID);
 
-                                    // To-do ***Add shop to SQLite Database here****
-
-
-                                        Intent nextIntent = new Intent(NewCoffeeShopActivity.this, CoffeeShopsActivity.class);
-                                        nextIntent.putExtra("userID", userID);
-                                        nextIntent.putExtra("name", name);
-                                        NewCoffeeShopActivity.this.startActivity(nextIntent);
+                                    if (myDB.getAllShops().contains(newShop)) {
+                                        Toast.makeText(NewCoffeeShopActivity.this, "Shop already registered in your list - please 'Find Shop' again or go back to list", Toast.LENGTH_LONG).show();
+                                        return;
+                                    }
+                                    // Add shop to Shops Table
+                                    myDB.addShop(newShop);
+                                    Intent nextIntent = new Intent(NewCoffeeShopActivity.this, CoffeeShopsActivity.class);
+                                    nextIntent.putExtra("userID", userID);
+                                    nextIntent.putExtra("name", name);
+                                    NewCoffeeShopActivity.this.startActivity(nextIntent);
 
                                 } catch (JSONException e) {
                                     e.printStackTrace();
@@ -205,29 +207,32 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                             }
 
                         };
-                        NewCoffeeShopRequest newCoffeeShopRequest = new NewCoffeeShopRequest(responseListener, shopName, address, wifiName, wifiMAC, lat, lng, shopWeb, phoneNum, userID, placeID);
+
+                        NewCoffeeShopRequest newCoffeeShopRequest = new NewCoffeeShopRequest(responseListener, shopName, address, wifiSSID, wifiMAC, lat, lng, shopWeb, phone, userID, placeID);
                         RequestQueue queue = Volley.newRequestQueue(NewCoffeeShopActivity.this);
                         queue.add(newCoffeeShopRequest);
 
                     }
 
                 });
-
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == PLACE_PICKER_REQUEST) {
-
+        if (resultCode != RESULT_CANCELED && data != null && requestCode == PLACE_PICKER_REQUEST) {
             Place place = PlacePicker.getPlace(NewCoffeeShopActivity.this, data);
+            Log.d("place: ", place.toString());
             tvShopName.setText(place.getName().toString());
             tvShopAddress.setText(place.getAddress().toString());
-            shopWeb = place.getWebsiteUri().toString();
+            if (place.getWebsiteUri() != null) {
+                shopWeb = place.getWebsiteUri().toString();
+            } else {
+                shopWeb = "URL not available";
+            }
             lat = String.valueOf(place.getLatLng().latitude);
             lng = String.valueOf(place.getLatLng().longitude);
-            phoneNum = place.getPhoneNumber().toString();
-            placeID = place.getId().toString();
+            phone = place.getPhoneNumber().toString();
+            placeID = place.getId();
         }
     }
 }

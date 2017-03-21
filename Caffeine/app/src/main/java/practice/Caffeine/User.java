@@ -30,11 +30,11 @@ public class User {
         this.email = email;
     }
 
-    public int getId() {
+    public int getID() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setID(int id) {
         this.id = id;
     }
 
@@ -86,7 +86,7 @@ public class User {
         this.locationID = locationID;
     }
 
-    public String getEnail() {
+    public String getEmail() {
         return email;
     }
 

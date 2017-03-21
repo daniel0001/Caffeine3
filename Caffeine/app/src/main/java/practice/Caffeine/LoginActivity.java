@@ -24,6 +24,7 @@ import java.io.File;
 
 public class LoginActivity extends AppCompatActivity {
     DatabaseHelper myDB;
+    private Integer userID;
 
     /**
      * Check if the database exist and can be read.
@@ -81,11 +82,10 @@ public class LoginActivity extends AppCompatActivity {
                             boolean success = jsonResponse.getBoolean("success");
 
                             if (success) {
-
                                 // Get data from JSONresponse from database
                                 String name = jsonResponse.getString("name");
-                                Integer userID = jsonResponse.getInt("user_id");  // user_id is the name in the database but userID in app
-                                int phone = jsonResponse.getInt("phone");
+                                userID = jsonResponse.getInt("user_id");  // user_id is the name in the database but userID in app
+                                String phone = jsonResponse.getString("phone");
                                 int locationID = jsonResponse.getInt("location_id");
                                 String email = jsonResponse.getString("email");
 
@@ -94,8 +94,16 @@ public class LoginActivity extends AppCompatActivity {
                                 Boolean myDBExists = doesDatabaseExist(LoginActivity.this, getDatabasePath(DatabaseHelper.databasePath).toString());
                                 if (!myDBExists) {
                                     myDB.getWritableDatabase();
-                                    boolean isInserted = myDB.insertDataUserTable(username, userID, name, password, phone, locationID, email);
-                                    if (isInserted) {
+                                    User user = new User();
+                                    user.setUsername(username);
+                                    user.setUserID(userID);
+                                    user.setName(name);
+                                    user.setEmail(email);
+                                    user.setLocationID(locationID);
+                                    user.setPassword(password);
+                                    user.setPhone(phone);
+
+                                    if (myDB.addUser(user)) {
                                         Toast.makeText(LoginActivity.this, "Data Inserted", Toast.LENGTH_LONG).show();
                                     } else {
                                         Toast.makeText(LoginActivity.this, "Data not Inserted", Toast.LENGTH_LONG).show();

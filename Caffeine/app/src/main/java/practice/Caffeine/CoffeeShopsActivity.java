@@ -12,6 +12,7 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
@@ -20,13 +21,15 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 
 public class CoffeeShopsActivity extends AppCompatActivity {
 
     private RecyclerView recyclerView;
     private ShopAdapter adapter;
-    private ArrayList<Shop> shopList;
+    private ArrayList<ShopCard> shopList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,11 +39,9 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         initCollapsingToolbar();
-
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
         shopList = new ArrayList<>();
-        populateList(shopList);
         adapter = new ShopAdapter(this, shopList);
 
         RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(this, 2);
@@ -60,7 +61,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
          // Variables passed to this activity from Login
          Intent intent = getIntent();
          final String name = intent.getStringExtra("name");
-         final String userID = intent.getStringExtra("userID");
+        final Integer userID = intent.getIntExtra("userID", 0);
          final Button bAddShop = (Button) findViewById(R.id.bAddShop);
 
 
@@ -111,10 +112,10 @@ public class CoffeeShopsActivity extends AppCompatActivity {
     }
 
     /**
-     * Adding few albums for testing
+     * Adding ShopCards
      */
     private void prepareShops() {
-        int[] covers = new int[]{
+        int[] shopImages = new int[]{
                 R.drawable.addshop,
                 R.drawable.shop1,
                 R.drawable.shop2,
@@ -124,37 +125,36 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                 R.drawable.shop6,
         };
 
-        Shop a = new Shop("Add New Coffee Shop", 0, covers[0]);
+        ShopCard a = new ShopCard("Add New Coffee Shop", 0, shopImages[0]);
         shopList.add(a);
 
-        a = new Shop("Sugar Ray", 8, covers[1]);
-        shopList.add(a);
+        DatabaseHelper myDB = new DatabaseHelper(this);
+        myDB.getReadableDatabase();
+        List<Shop> dbShopList = myDB.getAllShops();
+        Log.d("DBshopList: ", dbShopList.toString());
 
-        a = new Shop("Tanseys", 11, covers[2]);
-        shopList.add(a);
+        Random rand = new Random();
 
-        a = new Shop("The Coffee Lounge", 12, covers[3]);
-        shopList.add(a);
-
-        a = new Shop("The Coffee Mill", 14, covers[4]);
-        shopList.add(a);
-
-        a = new Shop("Bistro 54", 1, covers[5]);
-        shopList.add(a);
-
-        a = new Shop("Chill", 11, covers[2]);
-        shopList.add(a);
-
-        a = new Shop("The Coffee Stop", 12, covers[3]);
-        shopList.add(a);
-
-        a = new Shop("BB's muffins", 14, covers[4]);
-        shopList.add(a);
-
-        a = new Shop("Add Shop", 1, covers[5]);
-        shopList.add(a);
-
-        adapter.notifyDataSetChanged();
+        if (dbShopList.size() > 0) {
+            for (int i = 1; i <= dbShopList.size(); i++) {
+                ShopCard shopCard = new ShopCard();
+                Shop shop = new Shop();
+                shop = myDB.getShop(i);
+                shopCard.setName(shop.getName());
+                int numVisits = 0;
+                Integer shopId = myDB.getShop(i).getShopID();
+                for (int j = 0; j < myDB.getAllVisits().size(); j++) {
+                    if (myDB.getVisit(i).getShopID() == shopId) {
+                        numVisits++;
+                    }
+                }
+                shopCard.setNumOfVisits(numVisits);
+                int x = 1 + rand.nextInt(5);
+                shopCard.setShopImage(shopImages[x]);
+                shopList.add(shopCard);
+            }
+            adapter.notifyDataSetChanged();
+        }
     }
 
     /**
@@ -163,13 +163,6 @@ public class CoffeeShopsActivity extends AppCompatActivity {
     private int dpToPx(int dp) {
         Resources r = getResources();
         return Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, r.getDisplayMetrics()));
-    }
-
-    private ArrayList<Shop> populateList(ArrayList<Shop> list) {
-
-        // Populate from SQLite database
-
-        return list;
     }
 
     /**

@@ -5,12 +5,13 @@ package practice.Caffeine;
  */
 
 public class Shop {
+    private int id;
     private int shopID;
     private String name;
     private String address;
     private String website;
-    private Float lat;
-    private Float lng;
+    private String lat;
+    private String lng;
     private String placeID;
     private String wifiMAC;
     private String wifiSSID;
@@ -19,8 +20,9 @@ public class Shop {
     }
 
 
-    public Shop(int shopID, String name, String address, String website, Float lat, Float lng, String placeID, String wifiMac, String wifiSSID) {
+    public Shop(int id, int shopID, String name, String address, String website, String lat, String lng, String placeID, String wifiMac, String wifiSSID) {
         super();
+        this.id = id;
         this.shopID = shopID;
         this.name = name;
         this.address = address;
@@ -33,12 +35,16 @@ public class Shop {
 
     }
 
+    public int getId() {
+        return id;
+    }
+
     public int getShopID() {
         return shopID;
     }
 
-    public void setID(int ID) {
-        this.shopID = shopID;
+    public void setShopID(int ID) {
+        this.shopID = ID;
     }
 
     public String getName() {
@@ -65,19 +71,19 @@ public class Shop {
         this.website = website;
     }
 
-    public Float getLat() {
+    public String getLat() {
         return lat;
     }
 
-    public void setLat(Float lat) {
+    public void setLat(String lat) {
         this.lat = lat;
     }
 
-    public Float getLng() {
+    public String getLng() {
         return lng;
     }
 
-    public void setLng(Float lng) {
+    public void setLng(String lng) {
         this.lng = lng;
     }
 
@@ -108,7 +114,8 @@ public class Shop {
     @Override
     public String toString() {
         return "Shop{" +
-                "shopID=" + shopID +
+                "id=" + id + '\'' +
+                "shopID=" + shopID + '\'' +
                 ", name='" + name + '\'' +
                 ", address='" + address + '\'' +
                 ", website='" + website + '\'' +
