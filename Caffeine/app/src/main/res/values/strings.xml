@@ -26,12 +26,14 @@
     <string name="Cancel">Cancel</string>
 
 
-    <string name="action_add_favourite">Add to Favourites</string>
-    // change this
-    <string name="action_play_next">Play Next</string>
-    // change this
+    <string name="action_view_shop_and_visit_details">View shop and visit details</string>
+
+    <string name="action_add_visit">Add visit</string>
+
     <string name="backdrop_title">LOVE COFFEE</string>
     <string name="backdrop_subtitle">My Loyalty Points</string>
+    <string name="wifi_not_connected">Wifi not connected</string>
+    <string name="open_wifi_settings">Open wifi settings</string>
 
 
 </resources>

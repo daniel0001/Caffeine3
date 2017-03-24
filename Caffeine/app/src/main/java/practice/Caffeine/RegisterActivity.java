@@ -27,6 +27,8 @@ import java.io.File;
  */
 public class RegisterActivity extends AppCompatActivity {
     private DatabaseHelper myDB;
+    private boolean gpsEnabled;
+    private boolean wifiConnected;
 
     /**
      * Check if the database exist and can be read.
@@ -59,6 +61,11 @@ public class RegisterActivity extends AppCompatActivity {
     {
         @Override
         public void onClick (View v){
+            // Check that location is switched on and internet connected
+            gpsEnabled = false;
+            wifiConnected = false;
+            CheckConnectedHelper checkConnectedHelper = new CheckConnectedHelper(RegisterActivity.this);
+            if (!checkConnectedHelper.checkConnected(gpsEnabled, wifiConnected)) return;
 
         final String name = etName.getText().toString();
         final String username = etUsername.getText().toString();

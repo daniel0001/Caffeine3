@@ -4,15 +4,13 @@ package practice.Caffeine;
 
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.location.LocationManager;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -30,6 +28,17 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.List;
+
+import static com.google.android.gms.location.places.Place.TYPE_CAFE;
+import static com.google.android.gms.location.places.Place.TYPE_CONVENIENCE_STORE;
+import static com.google.android.gms.location.places.Place.TYPE_FOOD;
+import static com.google.android.gms.location.places.Place.TYPE_GAS_STATION;
+import static com.google.android.gms.location.places.Place.TYPE_GROCERY_OR_SUPERMARKET;
+import static com.google.android.gms.location.places.Place.TYPE_GYM;
+import static com.google.android.gms.location.places.Place.TYPE_LIQUOR_STORE;
+import static com.google.android.gms.location.places.Place.TYPE_RESTAURANT;
 
 
 public class NewCoffeeShopActivity extends AppCompatActivity {
@@ -49,6 +58,9 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
     private String phone;
     private String placeID;
     private int shopID;
+    private List<Integer> placeTypes;
+    private boolean gpsEnabled;
+    private boolean wifiConnected;
 
 
     private int PLACE_PICKER_REQUEST = 1;
@@ -68,6 +80,10 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
         wifiSSID = null;
         wifiMAC = null;
 
+        // Check if location services and network connected
+        gpsEnabled = false;
+        wifiConnected = false;
+
         // Store shops to shopDB SQLite
         final DatabaseHelper myDB = new DatabaseHelper(this);
 
@@ -86,49 +102,13 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
 
         // final String wifiName = wifiSSID.replaceAll("^\"|\"$", "");
 
-        // Check if location services and network connected
-        LocationManager lm = (LocationManager) NewCoffeeShopActivity.this.getSystemService(Context.LOCATION_SERVICE);
-        boolean gps_enabled = false;
-        boolean network_enabled = false;
-
-        try {
-            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        } catch (Exception ex) {
-        }
-
-        try {
-            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        } catch (Exception ex) {
-        }
-
-        if (!gps_enabled && !network_enabled) {
-            // notify user
-            AlertDialog.Builder dialog = new AlertDialog.Builder(NewCoffeeShopActivity.this);
-            dialog.setMessage(NewCoffeeShopActivity.this.getResources().getString(R.string.gps_network_not_enabled));
-            dialog.setPositiveButton(NewCoffeeShopActivity.this.getResources().getString(R.string.open_location_settings), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                    // TODO Auto-generated method stub
-                    Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    NewCoffeeShopActivity.this.startActivity(myIntent);
-                    //get gps
-                }
-            });
-            dialog.setNegativeButton(NewCoffeeShopActivity.this.getString(R.string.Cancel), new DialogInterface.OnClickListener() {
-
-                @Override
-                public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                    // TODO Auto-generated method stub
-                }
-            });
-            dialog.show();
-        }
-
         // btnPlacePicker.onPickButtonClick();
 
         btnPlacePicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                CheckConnectedHelper checkConnectedHelper = new CheckConnectedHelper(NewCoffeeShopActivity.this);
+                if (!checkConnectedHelper.checkConnected(gpsEnabled, wifiConnected)) return;
                 // Construct an intent for the place picker
                 try {
                     PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
@@ -138,8 +118,6 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                 } catch (GooglePlayServicesNotAvailableException e) {
                     // ...
                 }
-                //    onActivityResult(PLACE_PICKER_REQUEST, RESULT_OK, getIntent() );
-
             }
 
 
@@ -147,11 +125,22 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
         btnAddShop.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View v) {
-                        final String shopName = tvShopName.getText().toString();
-                        final String address = tvShopAddress.getText().toString();
+
+                        CheckConnectedHelper checkConnectedHelper = new CheckConnectedHelper(NewCoffeeShopActivity.this);
+                        if (!checkConnectedHelper.checkConnected(gpsEnabled, wifiConnected)) return;
+
+                        final String shopName = tvShopName.getText().toString().replace("'", "").replace(",", "");
+                        final String address = tvShopAddress.getText().toString().replace("'", "");
+
                         // Check if the editext fields are empty and return if so
                         if (shopName.length() == 0 || address.length() == 0) {
-                            Toast.makeText(NewCoffeeShopActivity.this, "No shop name or shop adress - please 'Find Shop' again", Toast.LENGTH_LONG).show();
+                            Toast.makeText(NewCoffeeShopActivity.this, "No shop name or shop address - please 'Find Shop' again", Toast.LENGTH_LONG).show();
+                            // if not completed return to start
+                            return;
+                        }
+                        // check if the selected Place is a restaurant or coffee shop using getPlaceTypes List shown here(https://developers.google.com/android/reference/com/google/android/gms/location/places/Place)
+                        if (!(placeTypes.contains(TYPE_CAFE) || placeTypes.contains(TYPE_CONVENIENCE_STORE) || placeTypes.contains(TYPE_FOOD) || placeTypes.contains(TYPE_GAS_STATION) || placeTypes.contains(TYPE_GROCERY_OR_SUPERMARKET) || placeTypes.contains(TYPE_GYM) || placeTypes.contains(TYPE_LIQUOR_STORE) || placeTypes.contains(TYPE_RESTAURANT))) {
+                            Toast.makeText(NewCoffeeShopActivity.this, "Oh Snap! This shop doesn't appear to be on our list as a valid Coffee Shop, Store or Restaurant. Please 'Find Shop' again", Toast.LENGTH_LONG).show();
                             // if not completed return to start
                             return;
                         }
@@ -162,19 +151,13 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                             @Override
                             public void onResponse(String response) {
 
+                                // Must be online to add new shop (this preserves the remote SQL db as the master)
+
                                 try {
                                     Log.d("fixme", response);
                                     JSONObject jsonResponse = new JSONObject(response);
                                     boolean shopExists = jsonResponse.getBoolean("shopExists");
-                                    if (shopExists) {
-                                        Toast.makeText(NewCoffeeShopActivity.this, "Shop added to your Love Coffee cards.", Toast.LENGTH_LONG).show();
-                                    } else {
-                                        AlertDialog.Builder builder = new AlertDialog.Builder(NewCoffeeShopActivity.this);
-                                        builder.setMessage("Yay! It looks like you are the first person to register this shop for Love Coffee. That's great - but we will have to check if they accept 'Love Coffee' loyalty points. Please check with a member of staff. If they are curious they can visit www.lovecoffee.ie for merchant details.")
-                                                .setNegativeButton("Ok", null)
-                                                .create()
-                                                .show();
-                                    }
+
                                     myDB.getWritableDatabase();
                                     Shop newShop = new Shop();
 
@@ -190,13 +173,22 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                                     newShop.setWifiMAC(wifiMAC);
                                     newShop.setWifiSSID(wifiSSID);
 
-                                    if (myDB.getAllShops().contains(newShop)) {
+                                    // Check if the shop already exists in the SQLite database
+                                    // return if true
+
+                                    if (checkDB(shopID)) {
                                         Toast.makeText(NewCoffeeShopActivity.this, "Shop already registered in your list - please 'Find Shop' again or go back to list", Toast.LENGTH_LONG).show();
                                         return;
                                     }
                                     // Add shop to Shops Table
                                     myDB.addShop(newShop);
                                     Intent nextIntent = new Intent(NewCoffeeShopActivity.this, CoffeeShopsActivity.class);
+                                    if (shopExists) {
+                                        Toast.makeText(NewCoffeeShopActivity.this, "Shop added to your Love Coffee cards.", Toast.LENGTH_LONG).show();
+
+                                    } else {
+                                        nextIntent.putExtra("firstEverShopAdd", true);
+                                    }
                                     nextIntent.putExtra("userID", userID);
                                     nextIntent.putExtra("name", name);
                                     NewCoffeeShopActivity.this.startActivity(nextIntent);
@@ -206,14 +198,24 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                                 }
                             }
 
-                        };
+                            // TODO: Below should be reviewed for security issues around SQL injection
 
+                            private boolean checkDB(int shopID) {
+                                SQLiteDatabase db = myDB.getReadableDatabase();
+                                String sql = "SELECT * FROM shops WHERE shopID = " + shopID;
+                                SQLiteStatement statement = db.compileStatement(sql);
+
+                                try {
+                                    return statement.simpleQueryForLong() > 0;
+                                } finally {
+                                    statement.close();
+                                }
+                            }
+                        };
                         NewCoffeeShopRequest newCoffeeShopRequest = new NewCoffeeShopRequest(responseListener, shopName, address, wifiSSID, wifiMAC, lat, lng, shopWeb, phone, userID, placeID);
                         RequestQueue queue = Volley.newRequestQueue(NewCoffeeShopActivity.this);
                         queue.add(newCoffeeShopRequest);
-
                     }
-
                 });
     }
 
@@ -232,6 +234,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
             lat = String.valueOf(place.getLatLng().latitude);
             lng = String.valueOf(place.getLatLng().longitude);
             phone = place.getPhoneNumber().toString();
+            placeTypes = place.getPlaceTypes();
             placeID = place.getId();
         }
     }

@@ -25,6 +25,8 @@ import java.io.File;
 public class LoginActivity extends AppCompatActivity {
     DatabaseHelper myDB;
     private Integer userID;
+    private boolean gpsEnabled;
+    private boolean wifiConnected;
 
     /**
      * Check if the database exist and can be read.
@@ -40,8 +42,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        /* To DO  Check that location is switched on and internet connected */
 
 
         // Create the DB
@@ -62,12 +62,17 @@ public class LoginActivity extends AppCompatActivity {
 
         // listen to the button being clicked
         bLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
+
             public void onClick(View v) {
-                final String username = etUsername.getText().toString();
-                final String password = etPassword.getText().toString();
+                // Check that location is switched on and internet connected
+                gpsEnabled = false;
+                wifiConnected = false;
+                CheckConnectedHelper checkConnectedHelper = new CheckConnectedHelper(LoginActivity.this);
+                if (!checkConnectedHelper.checkConnected(gpsEnabled, wifiConnected)) return;
 
                 // Check if the editext fields are empty and return if so
+                final String username = etUsername.getText().toString();
+                final String password = etPassword.getText().toString();
                 if ( username.length() == 0 || password.length() == 0){
                     Toast.makeText(LoginActivity.this, "Please complete all of the Login info.", Toast.LENGTH_LONG).show();
                     return;         // if not completed return to start
@@ -116,7 +121,7 @@ public class LoginActivity extends AppCompatActivity {
                                 intent.putExtra("userID", userID);
                                 intent.putExtra("name", name);
 
-                                //Open UserAreaActivity
+                                //Open CoffeeShopsActivity
                                 LoginActivity.this.startActivity(intent);
                             } else {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);

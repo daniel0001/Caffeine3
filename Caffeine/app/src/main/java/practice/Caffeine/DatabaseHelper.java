@@ -83,7 +83,6 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
 
         public DatabaseHelper(Context context) {
             super(context, DATABASE_NAME, null, DATABASE_VERSION);
-
             databasePath = context.getDatabasePath(DATABASE_NAME).getPath();
         }
 
@@ -169,23 +168,27 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
                         null, // g. order by
                         null); // h. limit
         // 3. if we got results get the first one
-        if (cursor != null && cursor.moveToFirst()) {
-            cursor.moveToFirst();
-            // 4. build user object
-            User user = new User();
-            user.setID(Integer.parseInt(cursor.getString(0)));
-            user.setUsername(cursor.getString(1));
-            user.setUserID(Integer.parseInt(cursor.getString(2)));
-            user.setName(cursor.getString(3));
-            user.setPassword(cursor.getString(4));
-            user.setPhone(cursor.getString(5));
-            user.setLocationID(Integer.parseInt(cursor.getString(6)));
-            user.setEmail(cursor.getString(7));
-            //log
-            Log.d("getUser(" + id + ")", user.toString());
-            cursor.close();
-            // 5. return user
-            return user;
+        try {
+            if (cursor != null && cursor.moveToFirst()) {
+                cursor.moveToFirst();
+                // 4. build user object
+                User user = new User();
+                user.setID(Integer.parseInt(cursor.getString(0)));
+                user.setUsername(cursor.getString(1));
+                user.setUserID(Integer.parseInt(cursor.getString(2)));
+                user.setName(cursor.getString(3));
+                user.setPassword(cursor.getString(4));
+                user.setPhone(cursor.getString(5));
+                user.setLocationID(Integer.parseInt(cursor.getString(6)));
+                user.setEmail(cursor.getString(7));
+                //log
+                Log.d("getUser(" + id + ")", user.toString());
+                cursor.close();
+                // 5. return user
+                return user;
+            }
+        } finally {
+            db.close();
         }
         return null;
     }

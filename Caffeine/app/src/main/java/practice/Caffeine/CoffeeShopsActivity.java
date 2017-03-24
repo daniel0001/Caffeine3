@@ -7,6 +7,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
@@ -22,7 +23,6 @@ import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 
 public class CoffeeShopsActivity extends AppCompatActivity {
@@ -62,11 +62,23 @@ public class CoffeeShopsActivity extends AppCompatActivity {
          Intent intent = getIntent();
          final String name = intent.getStringExtra("name");
         final Integer userID = intent.getIntExtra("userID", 0);
-         final Button bAddShop = (Button) findViewById(R.id.bAddShop);
 
+        // Variable passed to this activity from NewCoffeeShopActivity
+        // check if this the first ever addition of this shop
+        // and reward user with congrats message
+        final Boolean firstTimeShopAdded = intent.getBooleanExtra("firstEverShopAdd", false);
+
+        if (firstTimeShopAdded) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(CoffeeShopsActivity.this);
+            builder.setMessage("***NEW SHOP DISCOVERED!*** \n \nCongratulations! It looks like you are the first person to register this shop for Love Coffee. \n\nThat's great - but we will have to check if they accept 'Love Coffee' loyalty points so please check with a member of staff now. \n\nIf more info is required, please visit www.lovecoffee.ie for merchant details.")
+                    .setNegativeButton("Ok", null)
+                    .create()
+                    .show();
+        }
 
          // Button to move to new coffee shop activity with variables
-         bAddShop.setOnClickListener(new View.OnClickListener() {
+        final Button bAddShop = (Button) findViewById(R.id.bAddShop);
+        bAddShop.setOnClickListener(new View.OnClickListener() {
 
              @Override
              public void onClick(View v) {
@@ -76,7 +88,6 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                  CoffeeShopsActivity.this.startActivity(intent);
              }
          });
-
      }
 
     /**
@@ -128,33 +139,46 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         ShopCard a = new ShopCard("Add New Coffee Shop", 0, shopImages[0]);
         shopList.add(a);
 
-        DatabaseHelper myDB = new DatabaseHelper(this);
-        myDB.getReadableDatabase();
-        List<Shop> dbShopList = myDB.getAllShops();
-        Log.d("DBshopList: ", dbShopList.toString());
+        // TODO: Sync the DB?
 
-        Random rand = new Random();
+        // check if connected to internet
+        IsWifiConnectedHelper con = new IsWifiConnectedHelper(this);
+        Boolean connected = con.getConnected();
+        if (!connected) {
+            con.notConnectedMessage();
+            // Set up new intent LoginActivity and send user back to Login again
+            Intent intent = new Intent(CoffeeShopsActivity.this, LoginActivity.class);
+            CoffeeShopsActivity.this.startActivity(intent);
+        } else {
+            // Read from Local SQLite db to populate shop list
+            DatabaseHelper myDB = new DatabaseHelper(this);
+            myDB.getReadableDatabase();
+            List<Shop> dbShopList = myDB.getAllShops();
+            Log.d("DBshopList: ", dbShopList.toString());
 
-        if (dbShopList.size() > 0) {
-            for (int i = 1; i <= dbShopList.size(); i++) {
-                ShopCard shopCard = new ShopCard();
-                Shop shop = new Shop();
-                shop = myDB.getShop(i);
-                shopCard.setName(shop.getName());
-                int numVisits = 0;
-                Integer shopId = myDB.getShop(i).getShopID();
-                for (int j = 0; j < myDB.getAllVisits().size(); j++) {
-                    if (myDB.getVisit(i).getShopID() == shopId) {
-                        numVisits++;
+            if (dbShopList.size() > 0) {
+                for (int i = 1; i <= dbShopList.size(); i++) {
+                    ShopCard shopCard = new ShopCard();
+                    Shop shop;
+                    shop = myDB.getShop(i);
+                    shopCard.setName(shop.getName());
+                    int numVisits = 0;
+                    Integer shopId = myDB.getShop(i).getShopID();
+                    for (int j = 0; j < myDB.getAllVisits().size(); j++) {
+                        if (myDB.getVisit(i).getShopID() == shopId) {
+                            numVisits++;
+                        }
                     }
+                    shopCard.setNumOfVisits(numVisits);
+                    shopCard.setShopImage(shopImages[(i % 6) + 1]);
+                    shopList.add(shopCard);
                 }
-                shopCard.setNumOfVisits(numVisits);
-                int x = 1 + rand.nextInt(5);
-                shopCard.setShopImage(shopImages[x]);
-                shopList.add(shopCard);
+                adapter.notifyDataSetChanged();
             }
-            adapter.notifyDataSetChanged();
+            // TODO: read remote SQL db and sync with the local SQLite db (remote is master) - get a count of shops on remote DB before building a list
+
         }
+
     }
 
     /**
@@ -204,3 +228,4 @@ public class CoffeeShopsActivity extends AppCompatActivity {
     }
 
 }
+
