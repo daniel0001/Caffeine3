@@ -31,7 +31,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         public static final String COLUMN_NAME_NAME = "name";
         public static final String COLUMN_NAME_PASSWORD = "password";
         public static final String COLUMN_NAME_PHONE = "phone";
-        public static final String COLUMN_NAME_LOCATIONID = "locationID";
+    public static final String COLUMN_NAME_LOCATION = "location";
         public static final String COLUMN_NAME_EMAIL = "email";
     public static final String COLUMN_NAME_VISITDATE = "visitDate";
     public static final String COLUMN_NAME_SHOPID = "shopID";
@@ -51,9 +51,9 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
                     COLUMN_NAME_NAME + " TEXT," +
                     COLUMN_NAME_PASSWORD + " TEXT," +
                     COLUMN_NAME_PHONE + " TEXT," +
-                    COLUMN_NAME_LOCATIONID + " INTEGER," +
-                    COLUMN_NAME_EMAIL + " TEXT)";
-    private static final String[] USER_COLUMNS = {_ID, COLUMN_NAME_USERNAME, COLUMN_NAME_USERID, COLUMN_NAME_NAME, COLUMN_NAME_PASSWORD, COLUMN_NAME_PHONE, COLUMN_NAME_LOCATIONID, COLUMN_NAME_EMAIL};
+                    COLUMN_NAME_EMAIL + " TEXT," +
+                    COLUMN_NAME_LOCATION + " TEXT)";
+    private static final String[] USER_COLUMNS = {_ID, COLUMN_NAME_USERNAME, COLUMN_NAME_USERID, COLUMN_NAME_NAME, COLUMN_NAME_PASSWORD, COLUMN_NAME_PHONE, COLUMN_NAME_EMAIL, COLUMN_NAME_LOCATION};
 
     private static final String SQL_CREATE_SHOPSTABLE =
             "CREATE TABLE " + TABLE_NAME_SHOPS + " (" +
@@ -118,8 +118,8 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         values.put(COLUMN_NAME_NAME, user.getName());
         values.put(COLUMN_NAME_PASSWORD, user.getPassword());
         values.put(COLUMN_NAME_PHONE, user.getPhone());
-        values.put(COLUMN_NAME_LOCATIONID, user.getLocationID());
         values.put(COLUMN_NAME_EMAIL, user.getEmail());
+        values.put(COLUMN_NAME_LOCATION, user.getLocation());
         long result = db.insert(TABLE_NAME_USER, null, values);
             return result != -1;
             }
@@ -179,7 +179,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
                 user.setName(cursor.getString(3));
                 user.setPassword(cursor.getString(4));
                 user.setPhone(cursor.getString(5));
-                user.setLocationID(Integer.parseInt(cursor.getString(6)));
+                user.setLocation(cursor.getString(6));
                 user.setEmail(cursor.getString(7));
                 //log
                 Log.d("getUser(" + id + ")", user.toString());
@@ -341,7 +341,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
                 user.setName(cursor.getString(3));
                 user.setPassword(cursor.getString(4));
                 user.setPhone(cursor.getString(5));
-                user.setLocationID(Integer.parseInt(cursor.getString(6)));
+                user.setLocation(cursor.getString(6));
                 user.setEmail(cursor.getString(7));
                 // Add shop to shops
                 users.add(user);
@@ -367,7 +367,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         values.put(COLUMN_NAME_NAME, user.getName());
         values.put(COLUMN_NAME_PASSWORD, user.getPassword());
         values.put(COLUMN_NAME_PHONE, user.getPhone());
-        values.put(COLUMN_NAME_LOCATIONID, user.getLocationID());
+        values.put(COLUMN_NAME_LOCATION, user.getLocation());
         values.put(COLUMN_NAME_EMAIL, user.getEmail());
         // 3. updating row
         int i = db.update(TABLE_NAME_USER, //table

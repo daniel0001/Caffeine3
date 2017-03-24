@@ -17,7 +17,7 @@ public class RegisterRequest extends StringRequest {
 
     private Map<String, String> params;
 
-    public RegisterRequest(Response.Listener<String> listener, String username, String name, String password, String phone, String city, String country, String email) {
+    public RegisterRequest(Response.Listener<String> listener, String username, String name, String password, String phone, String email, String location) {
         super(Method.POST, REGISTER_REQUEST_URL, listener, null);
         params = new HashMap<>();
 
@@ -25,9 +25,8 @@ public class RegisterRequest extends StringRequest {
         params.put("name", name);
         params.put("password", password);
         params.put("phone", phone + "");
-        params.put("city", city);
-        params.put("country", country);
         params.put("email", email);
+        params.put("location", location + "");
     }
     public Map<String, String> getParams() {
         return params;

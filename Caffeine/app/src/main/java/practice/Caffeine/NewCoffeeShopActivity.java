@@ -152,48 +152,58 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                             public void onResponse(String response) {
 
                                 // Must be online to add new shop (this preserves the remote SQL db as the master)
-
+                                boolean shopExists;
                                 try {
                                     Log.d("fixme", response);
-                                    JSONObject jsonResponse = new JSONObject(response);
-                                    boolean shopExists = jsonResponse.getBoolean("shopExists");
-
-                                    myDB.getWritableDatabase();
-                                    Shop newShop = new Shop();
-
-                                    //  SHOPS_COLUMNS = {_ID, COLUMN_NAME_SHOPID, COLUMN_NAME_NAME, COLUMN_NAME_ADDRESS, COLUMN_NAME_WEBSITE, COLUMN_NAME_LAT, COLUMN_NAME_LNG, COLUMN_NAME_PLACEID, COLUMN_NAME_WIFIMAC, COLUMN_NAME_WIFISSID};
-                                    shopID = jsonResponse.getInt("shop_ID");
-                                    newShop.setShopID(shopID);
-                                    newShop.setName(shopName);
-                                    newShop.setAddress(address);
-                                    newShop.setWebsite(shopWeb);
-                                    newShop.setLat(lat);
-                                    newShop.setLng(lng);
-                                    newShop.setPlaceID(placeID);
-                                    newShop.setWifiMAC(wifiMAC);
-                                    newShop.setWifiSSID(wifiSSID);
-
-                                    // Check if the shop already exists in the SQLite database
-                                    // return if true
-
-                                    if (checkDB(shopID)) {
-                                        Toast.makeText(NewCoffeeShopActivity.this, "Shop already registered in your list - please 'Find Shop' again or go back to list", Toast.LENGTH_LONG).show();
+                                    JSONObject jsonResponse;
+                                    try {
+                                        jsonResponse = new JSONObject(response);
+                                        shopExists = jsonResponse.getBoolean("shopExists");
+                                        shopID = jsonResponse.getInt("shop_ID");
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                        Toast.makeText(NewCoffeeShopActivity.this, "Error, please try again", Toast.LENGTH_LONG).show();
                                         return;
                                     }
-                                    // Add shop to Shops Table
-                                    myDB.addShop(newShop);
-                                    Intent nextIntent = new Intent(NewCoffeeShopActivity.this, CoffeeShopsActivity.class);
-                                    if (shopExists) {
-                                        Toast.makeText(NewCoffeeShopActivity.this, "Shop added to your Love Coffee cards.", Toast.LENGTH_LONG).show();
-
+                                    myDB.getWritableDatabase();
+                                    Shop newShop = new Shop();
+                                    // Check if the shop already exists in the SQLite database
+                                    // return if true
+                                    if (checkDB(shopID)) {
+                                        Toast.makeText(NewCoffeeShopActivity.this, "Shop already registered in your list - please 'Find Shop' again or go back", Toast.LENGTH_LONG).show();
+                                        return;
                                     } else {
-                                        nextIntent.putExtra("firstEverShopAdd", true);
-                                    }
-                                    nextIntent.putExtra("userID", userID);
-                                    nextIntent.putExtra("name", name);
-                                    NewCoffeeShopActivity.this.startActivity(nextIntent);
+                                        // Add shop to Shops Table
+                                        try {
+                                            //  SHOPS_COLUMNS = {_ID, COLUMN_NAME_SHOPID, COLUMN_NAME_NAME, COLUMN_NAME_ADDRESS, COLUMN_NAME_WEBSITE, COLUMN_NAME_LAT, COLUMN_NAME_LNG, COLUMN_NAME_PLACEID, COLUMN_NAME_WIFIMAC, COLUMN_NAME_WIFISSID};
+                                            shopID = jsonResponse.getInt("shop_ID");
+                                            newShop.setShopID(shopID);
+                                            newShop.setName(shopName);
+                                            newShop.setAddress(address);
+                                            newShop.setWebsite(shopWeb);
+                                            newShop.setLat(lat);
+                                            newShop.setLng(lng);
+                                            newShop.setPlaceID(placeID);
+                                            newShop.setWifiMAC(wifiMAC);
+                                            newShop.setWifiSSID(wifiSSID);
+                                            myDB.addShop(newShop);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                            Toast.makeText(NewCoffeeShopActivity.this, "Error, please try again", Toast.LENGTH_LONG).show();
+                                            return;
+                                        }
 
-                                } catch (JSONException e) {
+                                        Intent nextIntent = new Intent(NewCoffeeShopActivity.this, CoffeeShopsActivity.class);
+                                        if (shopExists) {
+                                            Toast.makeText(NewCoffeeShopActivity.this, "Shop added to your Love Coffee cards.", Toast.LENGTH_LONG).show();
+                                        } else {
+                                            nextIntent.putExtra("firstEverShopAdd", true);
+                                        }
+                                        nextIntent.putExtra("userID", userID);
+                                        nextIntent.putExtra("name", name);
+                                        NewCoffeeShopActivity.this.startActivity(nextIntent);
+                                    }
+                                } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                             }
@@ -204,12 +214,13 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                                 SQLiteDatabase db = myDB.getReadableDatabase();
                                 String sql = "SELECT * FROM shops WHERE shopID = " + shopID;
                                 SQLiteStatement statement = db.compileStatement(sql);
-
+                                boolean x;
                                 try {
-                                    return statement.simpleQueryForLong() > 0;
+                                    x = statement.simpleQueryForLong() > 0;
                                 } finally {
                                     statement.close();
                                 }
+                                return x;
                             }
                         };
                         NewCoffeeShopRequest newCoffeeShopRequest = new NewCoffeeShopRequest(responseListener, shopName, address, wifiSSID, wifiMAC, lat, lng, shopWeb, phone, userID, placeID);

@@ -12,13 +12,13 @@ public class User {
     private String name;
     private String password;
     private String phone;
-    private int locationID;
     private String email;
+    private String location;
 
     public User() {
     }
 
-    public User(int id, String username, int userID, String name, String password, String phone, int locationID, String email) {
+    public User(int id, String username, int userID, String name, String password, String phone, String email, String location) {
         super();
         this.id = id;
         this.username = username;
@@ -26,8 +26,8 @@ public class User {
         this.name = name;
         this.password = password;
         this.phone = phone;
-        this.locationID = locationID;
         this.email = email;
+        this.location = location;
     }
 
     public int getID() {
@@ -78,12 +78,12 @@ public class User {
         this.phone = phone;
     }
 
-    public int getLocationID() {
-        return locationID;
+    public String getLocation() {
+        return location;
     }
 
-    public void setLocationID(int locationID) {
-        this.locationID = locationID;
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public String getEmail() {
@@ -103,7 +103,7 @@ public class User {
                 ", name='" + name + '\'' +
                 ", password='" + password + '\'' +
                 ", phone='" + phone + '\'' +
-                ", locationID=" + locationID +
+                ", location='" + location + '\'' +
                 ", email='" + email + '\'' +
                 '}';
     }

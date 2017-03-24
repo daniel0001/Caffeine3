@@ -42,10 +42,9 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        gpsEnabled = false;
+        wifiConnected = false;
 
-
-        // Create the DB
-        myDB = new DatabaseHelper(this);
         final EditText etUsername = (EditText) findViewById(R.id.etUsername);
         final EditText etPassword = (EditText) findViewById(R.id.etPassword);
         final Button bLogin = (Button) findViewById(R.id.bLogin);
@@ -54,6 +53,11 @@ public class LoginActivity extends AppCompatActivity {
         tvRegisterLink.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
+                // Check that location is switched on and internet connected
+                CheckConnectedHelper checkConnectedHelper = new CheckConnectedHelper(LoginActivity.this);
+                if (!checkConnectedHelper.checkConnected(gpsEnabled, wifiConnected)) return;
+
+                // Start next intent Register Actvity
                 Intent registerIntent = new Intent(LoginActivity.this, RegisterActivity.class);
                 LoginActivity.this.startActivity(registerIntent);
             }
@@ -64,9 +68,9 @@ public class LoginActivity extends AppCompatActivity {
         bLogin.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
+                // Create the DB
+                myDB = new DatabaseHelper(LoginActivity.this);
                 // Check that location is switched on and internet connected
-                gpsEnabled = false;
-                wifiConnected = false;
                 CheckConnectedHelper checkConnectedHelper = new CheckConnectedHelper(LoginActivity.this);
                 if (!checkConnectedHelper.checkConnected(gpsEnabled, wifiConnected)) return;
 
@@ -91,7 +95,7 @@ public class LoginActivity extends AppCompatActivity {
                                 String name = jsonResponse.getString("name");
                                 userID = jsonResponse.getInt("user_id");  // user_id is the name in the database but userID in app
                                 String phone = jsonResponse.getString("phone");
-                                int locationID = jsonResponse.getInt("location_id");
+                                String location = jsonResponse.getString("location");
                                 String email = jsonResponse.getString("email");
 
                                 // If myDB exists Enter Data into SQLite DB 'myDB'
@@ -104,9 +108,9 @@ public class LoginActivity extends AppCompatActivity {
                                     user.setUserID(userID);
                                     user.setName(name);
                                     user.setEmail(email);
-                                    user.setLocationID(locationID);
                                     user.setPassword(password);
                                     user.setPhone(phone);
+                                    user.setLocation(location);
 
                                     if (myDB.addUser(user)) {
                                         Toast.makeText(LoginActivity.this, "Data Inserted", Toast.LENGTH_LONG).show();
