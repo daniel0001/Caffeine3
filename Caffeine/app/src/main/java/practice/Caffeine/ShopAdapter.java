@@ -5,6 +5,7 @@ package practice.Caffeine;
  */
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -42,13 +43,37 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> 
     @Override
     public void onBindViewHolder(final MyViewHolder holder, int position) {
 
-        ShopCard shopCard = shopList.get(position);
+        final ShopCard shopCard = shopList.get(position);
         holder.title.setText(shopCard.getName());
-        holder.count.setText(shopCard.getNumOfVisits() + " visits");
+        holder.visits.setText(shopCard.getNumOfVisits() + " visits");
 
         // loading shop card using Glide library
         Glide.with(mContext).load(shopCard.getShopImage()).into(holder.thumbnail);
 
+        holder.thumbnail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DatabaseHelper myDB = new DatabaseHelper(mContext);
+                User user = myDB.getUser(1);
+                int userID = user.getUserID();
+                String name = user.getName();
+
+                if (shopCard.getName() == mContext.getString(R.string.add_new_coffee_shop)) {
+                    Intent intent = new Intent(mContext, NewCoffeeShopActivity.class);
+                    intent.putExtra("userID", userID);
+                    intent.putExtra("name", name);
+                    mContext.startActivity(intent);
+                } else {
+                    Intent intent = new Intent(mContext, VisitDetailsActivity.class);
+                    intent.putExtra("name", name);
+                    intent.putExtra("userID", userID);
+                    intent.putExtra("shopName", shopCard.getName());
+                    intent.putExtra("shopAddress", shopCard.getShopAddress());
+                    intent.putExtra("shopPhone", shopCard.getShopPhone());
+                    mContext.startActivity(intent);
+                }
+            }
+        });
 
         holder.overflow.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,6 +82,7 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> 
             }
         });
     }
+
 
     /**
      * Showing popup menu when tapping on 3 dots
@@ -77,13 +103,13 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> 
     }
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
-        public TextView title, count;
+        public TextView title, visits;
         public ImageView thumbnail, overflow;
 
         public MyViewHolder(View view) {
             super(view);
             title = (TextView) view.findViewById(R.id.title);
-            count = (TextView) view.findViewById(R.id.count);
+            visits = (TextView) view.findViewById(R.id.visits);
             thumbnail = (ImageView) view.findViewById(R.id.thumbnail);
             overflow = (ImageView) view.findViewById(R.id.overflow);
         }
@@ -96,6 +122,7 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> 
 
         private MyMenuItemClickListener() {
         }
+
 
         @Override
         public boolean onMenuItemClick(MenuItem menuItem) {

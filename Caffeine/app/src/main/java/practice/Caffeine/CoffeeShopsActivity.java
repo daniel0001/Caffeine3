@@ -27,9 +27,11 @@ import java.util.List;
 
 public class CoffeeShopsActivity extends AppCompatActivity {
 
+    private static final int MAX_VISITS_PER_FREE_COFFEE = 9;
     private RecyclerView recyclerView;
     private ShopAdapter adapter;
     private ArrayList<ShopCard> shopList;
+    private DatabaseHelper myDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,18 +52,20 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         recyclerView.setItemAnimator(new DefaultItemAnimator());
         recyclerView.setAdapter(adapter);
 
-        prepareShops();
+        // Variables passed to this activity from Login
+        Intent intent = getIntent();
+        final String name = intent.getStringExtra("name");
+        final Integer userID = intent.getIntExtra("userID", 0);
+
+        // Load shops
+        prepareShops(userID);
+
 
         try {
             Glide.with(this).load(R.drawable.love_coffee).into((ImageView) findViewById(R.id.backdrop));
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-         // Variables passed to this activity from Login
-         Intent intent = getIntent();
-         final String name = intent.getStringExtra("name");
-        final Integer userID = intent.getIntExtra("userID", 0);
 
         // Variable passed to this activity from NewCoffeeShopActivity
         // check if this the first ever addition of this shop
@@ -76,19 +80,20 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                     .show();
         }
 
-         // Button to move to new coffee shop activity with variables
+        // Button to move to new coffee shop activity with variables
         final Button bAddShop = (Button) findViewById(R.id.bAddShop);
         bAddShop.setOnClickListener(new View.OnClickListener() {
 
-             @Override
-             public void onClick(View v) {
-                 Intent intent = new Intent(CoffeeShopsActivity.this, NewCoffeeShopActivity.class);
-                 intent.putExtra("userID", userID);
-                 intent.putExtra("name", name);
-                 CoffeeShopsActivity.this.startActivity(intent);
-             }
-         });
-     }
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(CoffeeShopsActivity.this, NewCoffeeShopActivity.class);
+                intent.putExtra("userID", userID);
+                intent.putExtra("name", name);
+                CoffeeShopsActivity.this.startActivity(intent);
+            }
+        });
+    }
+
 
     /**
      * Initializing collapsing toolbar
@@ -125,7 +130,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
     /**
      * Adding ShopCards
      */
-    private void prepareShops() {
+    private void prepareShops(int userID) {
         int[] shopImages = new int[]{
                 R.drawable.addshop,
                 R.drawable.shop1,
@@ -136,10 +141,15 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                 R.drawable.shop6,
         };
 
-        ShopCard a = new ShopCard("Add New Coffee Shop", 0, shopImages[0]);
+        ShopCard a = new ShopCard(getString(R.string.add_new_coffee_shop), 0, shopImages[0], null, null);
         shopList.add(a);
 
         // TODO: Sync the DB?
+
+        SyncShopsHelper syncShops = new SyncShopsHelper();
+        syncShops.SyncShopsHelper(CoffeeShopsActivity.this, userID);
+
+
 
         // check if connected to internet
         IsWifiConnectedHelper con = new IsWifiConnectedHelper(this);
@@ -162,14 +172,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                     Shop shop;
                     shop = myDB.getShop(i);
                     shopCard.setName(shop.getName());
-                    int numVisits = 0;
-                    Integer shopId = myDB.getShop(i).getShopID();
-                    for (int j = 0; j < myDB.getAllVisits().size(); j++) {
-                        if (myDB.getVisit(i).getShopID() == shopId) {
-                            numVisits++;
-                        }
-                    }
-                    shopCard.setNumOfVisits(numVisits);
+                    shopCard.setNumOfVisits(visitCount(shop.getShopID() % MAX_VISITS_PER_FREE_COFFEE));
                     shopCard.setShopImage(shopImages[(i % 6) + 1]);
                     shopList.add(shopCard);
                 }
@@ -179,6 +182,20 @@ public class CoffeeShopsActivity extends AppCompatActivity {
 
         }
 
+    }
+
+    // Helper method to sync the remote DB with the local SQLite db shops table
+
+
+    private int visitCount(int shopID) {
+        DatabaseHelper myDB = new DatabaseHelper(this);
+        myDB.getReadableDatabase();
+        int visitCount = 0;
+        for (int i = 0; i < myDB.getAllVisits().size(); i++) {
+            Visit visit = myDB.getVisit(i);
+            if (visit.getShopID() == shopID) visitCount++;
+        }
+        return visitCount;
     }
 
     /**

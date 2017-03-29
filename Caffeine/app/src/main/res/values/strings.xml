@@ -1,17 +1,18 @@
 <resources>
     <string name="app_name">LoveCoffee.ie</string>
     <string name="google_maps_key">AIzaSyATkaNLzLoIkXs0OVWeo7y7n2cgNwELHdw</string>
-    <string name="register_here">Register Here</string>
+    <string name="register">Let\'s go!</string>
     <string name="name">Name</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
-    <string name="login">Login</string>
+    <string name="login">Dive In</string>
     <string name="town_city">Town / City</string>
     <string name="country">Country</string>
     <string name="phone_number">Phone Number</string>
     <string name="email_address">Email Address</string>
     <string name="user_details">User Details</string>
-    <string name="register">Register</string>
+    <string name="register_here">I\'m new here. Hook me up!</string>
+    <string name="add_new_coffee_shop">Add New Coffee Shop</string>
 
     <string name="plus_sign">+</string>
     <string name="wifi_SSID_check">Please switch on your wifi</string>

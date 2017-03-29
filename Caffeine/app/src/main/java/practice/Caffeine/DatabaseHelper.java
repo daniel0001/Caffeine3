@@ -17,22 +17,19 @@ import java.util.List;
 public final class DatabaseHelper extends SQLiteOpenHelper{
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 4;
     public static final String DATABASE_NAME = "myDB.db";
     public static final String TABLE_NAME_USER = "user";
-
-
-    /* Inner class that defines the table contents */
     public static final String TABLE_NAME_SHOPS = "shops";
     public static final String TABLE_NAME_VISITS = "visits";
     public static final String _ID = "id";
-        public static final String COLUMN_NAME_USERNAME = "username";
-        public static final String COLUMN_NAME_USERID = "userID";
-        public static final String COLUMN_NAME_NAME = "name";
-        public static final String COLUMN_NAME_PASSWORD = "password";
-        public static final String COLUMN_NAME_PHONE = "phone";
-    public static final String COLUMN_NAME_LOCATION = "location";
-        public static final String COLUMN_NAME_EMAIL = "email";
+    public static final String COLUMN_NAME_USERNAME = "username";
+    public static final String COLUMN_NAME_USERID = "userID";
+    public static final String COLUMN_NAME_NAME = "name";
+    public static final String COLUMN_NAME_PASSWORD = "password";
+    public static final String COLUMN_NAME_PHONE = "phone";
+
+    public static final String COLUMN_NAME_EMAIL = "email";
     public static final String COLUMN_NAME_VISITDATE = "visitDate";
     public static final String COLUMN_NAME_SHOPID = "shopID";
     public static final String COLUMN_NAME_ADDRESS = "address";
@@ -52,8 +49,9 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
                     COLUMN_NAME_PASSWORD + " TEXT," +
                     COLUMN_NAME_PHONE + " TEXT," +
                     COLUMN_NAME_EMAIL + " TEXT," +
-                    COLUMN_NAME_LOCATION + " TEXT)";
-    private static final String[] USER_COLUMNS = {_ID, COLUMN_NAME_USERNAME, COLUMN_NAME_USERID, COLUMN_NAME_NAME, COLUMN_NAME_PASSWORD, COLUMN_NAME_PHONE, COLUMN_NAME_EMAIL, COLUMN_NAME_LOCATION};
+                    COLUMN_NAME_LAT + " TEXT," +
+                    COLUMN_NAME_LNG + " TEXT)";
+    private static final String[] USER_COLUMNS = {_ID, COLUMN_NAME_USERNAME, COLUMN_NAME_USERID, COLUMN_NAME_NAME, COLUMN_NAME_PASSWORD, COLUMN_NAME_PHONE, COLUMN_NAME_EMAIL, COLUMN_NAME_LAT, COLUMN_NAME_LNG};
 
     private static final String SQL_CREATE_SHOPSTABLE =
             "CREATE TABLE " + TABLE_NAME_SHOPS + " (" +
@@ -62,8 +60,8 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
                     COLUMN_NAME_NAME + " TEXT," +
                     COLUMN_NAME_ADDRESS + " TEXT," +
                     COLUMN_NAME_WEBSITE + " TEXT," +
-                    COLUMN_NAME_LAT + " FLOAT," +
-                    COLUMN_NAME_LNG + " FLOAT," +
+                    COLUMN_NAME_LAT + " TEXT," +
+                    COLUMN_NAME_LNG + " TEXT," +
                     COLUMN_NAME_PLACEID + " TEXT," +
                     COLUMN_NAME_WIFIMAC + " TEXT," +
                     COLUMN_NAME_WIFISSID + " TEXT)";
@@ -114,12 +112,13 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME_USERNAME, user.getUsername());
-        values.put(COLUMN_NAME_USERID, user.getID());
+        values.put(COLUMN_NAME_USERID, user.getUserID());
         values.put(COLUMN_NAME_NAME, user.getName());
         values.put(COLUMN_NAME_PASSWORD, user.getPassword());
         values.put(COLUMN_NAME_PHONE, user.getPhone());
         values.put(COLUMN_NAME_EMAIL, user.getEmail());
-        values.put(COLUMN_NAME_LOCATION, user.getLocation());
+        values.put(COLUMN_NAME_LAT, user.getLat());
+        values.put(COLUMN_NAME_LNG, user.getLng());
         long result = db.insert(TABLE_NAME_USER, null, values);
             return result != -1;
             }
@@ -179,8 +178,9 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
                 user.setName(cursor.getString(3));
                 user.setPassword(cursor.getString(4));
                 user.setPhone(cursor.getString(5));
-                user.setLocation(cursor.getString(6));
-                user.setEmail(cursor.getString(7));
+                user.setEmail(cursor.getString(6));
+                user.setLat(cursor.getString(7));
+                user.setLng(cursor.getString(8));
                 //log
                 Log.d("getUser(" + id + ")", user.toString());
                 cursor.close();
@@ -341,8 +341,9 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
                 user.setName(cursor.getString(3));
                 user.setPassword(cursor.getString(4));
                 user.setPhone(cursor.getString(5));
-                user.setLocation(cursor.getString(6));
-                user.setEmail(cursor.getString(7));
+                user.setEmail(cursor.getString(6));
+                user.setLat(cursor.getString(7));
+                user.setLng(cursor.getString(8));
                 // Add shop to shops
                 users.add(user);
             } while (cursor.moveToNext());
@@ -367,8 +368,9 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         values.put(COLUMN_NAME_NAME, user.getName());
         values.put(COLUMN_NAME_PASSWORD, user.getPassword());
         values.put(COLUMN_NAME_PHONE, user.getPhone());
-        values.put(COLUMN_NAME_LOCATION, user.getLocation());
         values.put(COLUMN_NAME_EMAIL, user.getEmail());
+        values.put(COLUMN_NAME_LAT, user.getLat());
+        values.put(COLUMN_NAME_LNG, user.getLng());
         // 3. updating row
         int i = db.update(TABLE_NAME_USER, //table
                 values, // column/value
@@ -451,7 +453,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         // 3. close
         db.close();
         //log
-        Log.d("deleteShop", shop.toString());
+
     }
 
     public void deleteVisit(Visit visit) {
@@ -467,5 +469,30 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         Log.d("deleteVisit", visit.toString());
     }
 
-        }
+    public void deleteAllUsers() {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_NAME_USER, null, null);
+        db.close();
+        Log.d("deletedAllUsers", "");
+    }
+
+    public void deleteAllShops() {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_NAME_SHOPS, null, null);
+        db.close();
+        Log.d("deletedAllShops", "");
+    }
+
+    public void deleteAllVisits() {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(TABLE_NAME_VISITS, null, null);
+        db.close();
+        Log.d("deletedAllVisits", "");
+    }
+
+
+}
 

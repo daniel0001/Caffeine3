@@ -13,12 +13,13 @@ public class User {
     private String password;
     private String phone;
     private String email;
-    private String location;
+    private String lat;
+    private String lng;
 
     public User() {
     }
 
-    public User(int id, String username, int userID, String name, String password, String phone, String email, String location) {
+    public User(int id, String username, int userID, String name, String password, String phone, String email, String lat, String lng) {
         super();
         this.id = id;
         this.username = username;
@@ -27,7 +28,8 @@ public class User {
         this.password = password;
         this.phone = phone;
         this.email = email;
-        this.location = location;
+        this.lat = lat;
+        this.lng = lng;
     }
 
     public int getID() {
@@ -78,14 +80,6 @@ public class User {
         this.phone = phone;
     }
 
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -93,6 +87,24 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public String getLat() {
+        return lat;
+    }
+
+    public void setLat(String lat) {
+        this.lat = lat;
+    }
+
+    public String getLng() {
+        return lng;
+    }
+
+    public void setLng(String lng) {
+        this.lng = lng;
+    }
+
+
 
     @Override
     public String toString() {
@@ -103,8 +115,9 @@ public class User {
                 ", name='" + name + '\'' +
                 ", password='" + password + '\'' +
                 ", phone='" + phone + '\'' +
-                ", location='" + location + '\'' +
                 ", email='" + email + '\'' +
+                ", lat='" + lat + '\'' +
+                ", lng='" + lng + '\'' +
                 '}';
     }
 }
