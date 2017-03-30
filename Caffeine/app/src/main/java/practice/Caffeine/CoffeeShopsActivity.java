@@ -16,13 +16,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class CoffeeShopsActivity extends AppCompatActivity {
@@ -31,7 +29,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ShopAdapter adapter;
     private ArrayList<ShopCard> shopList;
-    private DatabaseHelper myDB;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +37,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_coffee_shops);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
 
         initCollapsingToolbar();
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
@@ -57,9 +56,16 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         final String name = intent.getStringExtra("name");
         final Integer userID = intent.getIntExtra("userID", 0);
 
-        // Load shops
-        prepareShops(userID);
 
+        // TODO: finish coding the shops table sync - does it happen after response causing errors of table being empty
+        // should there be a callback implemented?
+        SyncShopsHelper sync = new SyncShopsHelper(this);
+        sync.sync(userID);
+
+
+
+        // Load shops
+        prepareShops();
 
         try {
             Glide.with(this).load(R.drawable.love_coffee).into((ImageView) findViewById(R.id.backdrop));
@@ -79,19 +85,6 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                     .create()
                     .show();
         }
-
-        // Button to move to new coffee shop activity with variables
-        final Button bAddShop = (Button) findViewById(R.id.bAddShop);
-        bAddShop.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(CoffeeShopsActivity.this, NewCoffeeShopActivity.class);
-                intent.putExtra("userID", userID);
-                intent.putExtra("name", name);
-                CoffeeShopsActivity.this.startActivity(intent);
-            }
-        });
     }
 
 
@@ -130,7 +123,9 @@ public class CoffeeShopsActivity extends AppCompatActivity {
     /**
      * Adding ShopCards
      */
-    private void prepareShops(int userID) {
+    private void prepareShops() {
+
+
         int[] shopImages = new int[]{
                 R.drawable.addshop,
                 R.drawable.shop1,
@@ -144,12 +139,8 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         ShopCard a = new ShopCard(getString(R.string.add_new_coffee_shop), 0, shopImages[0], null, null);
         shopList.add(a);
 
-        // TODO: Sync the DB?
-
-        SyncShopsHelper syncShops = new SyncShopsHelper();
-        syncShops.SyncShopsHelper(CoffeeShopsActivity.this, userID);
-
-
+        DatabaseHelper myDB = new DatabaseHelper(this);
+        myDB.getReadableDatabase();
 
         // check if connected to internet
         IsWifiConnectedHelper con = new IsWifiConnectedHelper(this);
@@ -161,31 +152,27 @@ public class CoffeeShopsActivity extends AppCompatActivity {
             CoffeeShopsActivity.this.startActivity(intent);
         } else {
             // Read from Local SQLite db to populate shop list
-            DatabaseHelper myDB = new DatabaseHelper(this);
-            myDB.getReadableDatabase();
-            List<Shop> dbShopList = myDB.getAllShops();
-            Log.d("DBshopList: ", dbShopList.toString());
 
-            if (dbShopList.size() > 0) {
-                for (int i = 1; i <= dbShopList.size(); i++) {
+            Log.d("CoffeeActivity: ", myDB.getAllShops().toString());
+            Shop shop1 = myDB.getShop(1);
+
+            if (0 < myDB.getAllShops().size()) {
+                for (int i = 1; i <= myDB.getAllShops().size(); i++) {
                     ShopCard shopCard = new ShopCard();
                     Shop shop;
                     shop = myDB.getShop(i);
                     shopCard.setName(shop.getName());
+                    shopCard.setShopPhone(shop.getPhoneNum());
+                    shopCard.setShopAddress(shop.getAddress());
                     shopCard.setNumOfVisits(visitCount(shop.getShopID() % MAX_VISITS_PER_FREE_COFFEE));
                     shopCard.setShopImage(shopImages[(i % 6) + 1]);
                     shopList.add(shopCard);
                 }
                 adapter.notifyDataSetChanged();
-            }
-            // TODO: read remote SQL db and sync with the local SQLite db (remote is master) - get a count of shops on remote DB before building a list
+                }
 
         }
-
     }
-
-    // Helper method to sync the remote DB with the local SQLite db shops table
-
 
     private int visitCount(int shopID) {
         DatabaseHelper myDB = new DatabaseHelper(this);

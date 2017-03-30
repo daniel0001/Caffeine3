@@ -132,18 +132,21 @@ public class LoginActivity extends AppCompatActivity {
                                 }
 
                                 // Enter user Data into SQLite DB 'myDB'
-                                    User user = new User();
-                                    user.setUsername(username);
-                                    user.setUserID(userID);
-                                    user.setName(name);
-                                    user.setEmail(email);
-                                    user.setPassword(password);
-                                    user.setPhone(phone);
+                                User user = new User();
+                                user.setUsername(username);
+                                user.setUserID(userID);
+                                user.setName(name);
+                                user.setEmail(email);
+                                user.setPassword(password);
+                                user.setPhone(phone);
                                 user.setLat(lat);
                                 user.setLng(lng);
                                 myDB.getWritableDatabase();
                                 myDB.addUser(user);
                                 Log.d("userID: ", myDB.getUser(1).getUserID() + "");
+
+                                // Sync the shops table with remote DB
+
 
                                 // Test to see if data inserted into table
                                 if (myDB.getUser(1).getUsername().equals(user.getUsername())) {
@@ -159,6 +162,7 @@ public class LoginActivity extends AppCompatActivity {
 
                                 //Open CoffeeShopsActivity
                                 LoginActivity.this.startActivity(intent);
+
                             } else {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                                 builder.setMessage("Login Failed")
