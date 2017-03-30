@@ -8,14 +8,18 @@ public class ShopCard {
     private String name;
     private int numOfVisits;
     private int shopImage;
+    private String shopAddress;
+    private String shopPhone;
 
     public ShopCard() {
     }
 
-    public ShopCard(String name, int numOfVisits, int shopImage) {
+    public ShopCard(String name, int numOfVisits, int shopImage, String shopAddress, String shopPhone) {
         this.name = name;
         this.numOfVisits = numOfVisits;
         this.shopImage = shopImage;
+        this.shopAddress = shopAddress;
+        this.shopPhone = shopPhone;
     }
 
     public String getName() {
@@ -42,4 +46,19 @@ public class ShopCard {
         this.shopImage = shopImage;
     }
 
+    public String getShopAddress() {
+        return shopAddress;
+    }
+
+    public void setShopAddress(String shopAddress) {
+        this.shopAddress = shopAddress;
+    }
+
+    public String getShopPhone() {
+        return shopPhone;
+    }
+
+    public void setShopPhone(String shopPhone) {
+        this.shopPhone = shopPhone;
+    }
 }

@@ -6,10 +6,10 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
@@ -24,9 +24,17 @@ import java.io.File;
 
 public class LoginActivity extends AppCompatActivity {
     DatabaseHelper myDB;
-    private Integer userID;
+    private int userID;
     private boolean gpsEnabled;
     private boolean wifiConnected;
+    private String username;
+    private String password;
+    private Button bLogin;
+    private Button bRegister;
+    private EditText etUsername;
+    private EditText etPassword;
+    private Toast toast;
+
 
     /**
      * Check if the database exist and can be read.
@@ -42,18 +50,34 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        gpsEnabled = false;
+        wifiConnected = false;
 
+        etUsername = (EditText) findViewById(R.id.etUsername);
+        etPassword = (EditText) findViewById(R.id.etPassword);
+        bLogin = (Button) findViewById(R.id.bLogin);
+        bRegister = (Button) findViewById(R.id.bRegister);
 
-        // Create the DB
-        myDB = new DatabaseHelper(this);
-        final EditText etUsername = (EditText) findViewById(R.id.etUsername);
-        final EditText etPassword = (EditText) findViewById(R.id.etPassword);
-        final Button bLogin = (Button) findViewById(R.id.bLogin);
-        final TextView tvRegisterLink = (TextView) findViewById(R.id.tvRegisterHere);
+        // New intent to collect username passed back from Register Activity
+        Intent registerIntent = getIntent();
+        if (registerIntent.hasExtra("username")) {
+            username = registerIntent.getStringExtra("username");
+            String upperString = username.substring(0, 1).toUpperCase() + username.substring(1);
+            username = upperString;
+            etUsername.setText(username);
+            toast = Toast.makeText(LoginActivity.this, "Congrats! You have registered for Love Coffee. Now let's dive in and start collecting those lovely loyalty points from yur favourite coffee shops!.", Toast.LENGTH_LONG);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
+        }
 
-        tvRegisterLink.setOnClickListener(new View.OnClickListener() {
+        bRegister.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
+                // Check that location is switched on and internet connected
+                CheckConnectedHelper checkConnectedHelper = new CheckConnectedHelper(LoginActivity.this);
+                if (!checkConnectedHelper.checkConnected(gpsEnabled, wifiConnected)) return;
+
+                // Start next intent Register Actvity
                 Intent registerIntent = new Intent(LoginActivity.this, RegisterActivity.class);
                 LoginActivity.this.startActivity(registerIntent);
             }
@@ -64,17 +88,18 @@ public class LoginActivity extends AppCompatActivity {
         bLogin.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
+                // Create the DB
+                myDB = new DatabaseHelper(LoginActivity.this);
                 // Check that location is switched on and internet connected
-                gpsEnabled = false;
-                wifiConnected = false;
                 CheckConnectedHelper checkConnectedHelper = new CheckConnectedHelper(LoginActivity.this);
                 if (!checkConnectedHelper.checkConnected(gpsEnabled, wifiConnected)) return;
 
                 // Check if the editext fields are empty and return if so
-                final String username = etUsername.getText().toString();
-                final String password = etPassword.getText().toString();
+                username = etUsername.getText().toString();
+                password = etPassword.getText().toString();
                 if ( username.length() == 0 || password.length() == 0){
-                    Toast.makeText(LoginActivity.this, "Please complete all of the Login info.", Toast.LENGTH_LONG).show();
+                    toast = Toast.makeText(LoginActivity.this, "Please complete all of the Login info.", Toast.LENGTH_LONG);
+                    toast.show();
                     return;         // if not completed return to start
                 }
 
@@ -91,30 +116,41 @@ public class LoginActivity extends AppCompatActivity {
                                 String name = jsonResponse.getString("name");
                                 userID = jsonResponse.getInt("user_id");  // user_id is the name in the database but userID in app
                                 String phone = jsonResponse.getString("phone");
-                                int locationID = jsonResponse.getInt("location_id");
                                 String email = jsonResponse.getString("email");
+                                String lat = jsonResponse.getString("lat");
+                                String lng = jsonResponse.getString("lat");
 
-                                // If myDB exists Enter Data into SQLite DB 'myDB'
-                                String dbName = "myDB.db";
+                                // If myDB already Exists then wipe clean - Data should be fresh from remote DB
+                                // to preserve accuracy and avoid syncing issues - An extension would be
+                                // to enable offline use by syncing more often between SQLite db (local) and SQL db (remote)
+                                // But this version is MVP to get to launch
                                 Boolean myDBExists = doesDatabaseExist(LoginActivity.this, getDatabasePath(DatabaseHelper.databasePath).toString());
-                                if (!myDBExists) {
-                                    myDB.getWritableDatabase();
+                                if (myDBExists) {
+                                    myDB.deleteAllShops();
+                                    myDB.deleteAllUsers();
+                                    myDB.deleteAllVisits();
+                                }
+
+                                // Enter user Data into SQLite DB 'myDB'
                                     User user = new User();
                                     user.setUsername(username);
                                     user.setUserID(userID);
                                     user.setName(name);
                                     user.setEmail(email);
-                                    user.setLocationID(locationID);
                                     user.setPassword(password);
                                     user.setPhone(phone);
+                                user.setLat(lat);
+                                user.setLng(lng);
+                                myDB.getWritableDatabase();
+                                myDB.addUser(user);
+                                Log.d("userID: ", myDB.getUser(1).getUserID() + "");
 
-                                    if (myDB.addUser(user)) {
+                                // Test to see if data inserted into table
+                                if (myDB.getUser(1).getUsername().equals(user.getUsername())) {
                                         Toast.makeText(LoginActivity.this, "Data Inserted", Toast.LENGTH_LONG).show();
                                     } else {
                                         Toast.makeText(LoginActivity.this, "Data not Inserted", Toast.LENGTH_LONG).show();
                                     }
-
-                                }
 
                                 // Set up new intent CoffeeShopsActivity
                                 Intent intent = new Intent(LoginActivity.this, CoffeeShopsActivity.class);

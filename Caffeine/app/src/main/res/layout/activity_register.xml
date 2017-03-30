@@ -14,7 +14,6 @@
         android:id="@+id/etName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
         android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
@@ -27,7 +26,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
@@ -40,7 +38,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
@@ -52,52 +49,23 @@
         android:id="@+id/etPhone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
         android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/etEmailAddress"
+        android:layout_below="@+id/etPassword"
         android:hint="@string/phone_number"
         android:inputType="phone" />
-
-    <EditText
-        android:id="@+id/etTownCity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/etPhone"
-        android:hint="@string/town_city"
-        android:inputType="textPostalAddress" />
-
-    <EditText
-        android:id="@+id/etCountry"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/etTownCity"
-        android:hint="@string/country"
-        android:inputType="textPostalAddress" />
 
     <EditText
         android:id="@+id/etEmailAddress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
         android:layout_alignParentEnd="true"
         android:layout_alignParentLeft="true"
-
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/etPassword"
+        android:layout_below="@+id/etPhone"
         android:hint="@string/email_address"
         android:inputType="textEmailAddress" />
 
@@ -106,11 +74,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/etCountry"
+        android:layout_below="@+id/etEmailAddress"
         android:clickable="true"
         android:text="@string/register" />
 

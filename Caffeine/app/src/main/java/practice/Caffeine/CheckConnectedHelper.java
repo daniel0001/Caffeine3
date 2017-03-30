@@ -21,20 +21,19 @@ public class CheckConnectedHelper {
         IsGPSEnabledHelper gpsHelper = new IsGPSEnabledHelper(mContext);
         try {
             gpsEnabled = gpsHelper.getConnected();
+            if (!gpsEnabled) {
+                gpsHelper.notConnectedMessage();
+            }
         } catch (Exception ex) {
         }
-        if (!gpsEnabled) {
-            gpsHelper.notConnectedMessage();
-            return false;
-        }
+
         try {
             wifiConnected = conHelper.getConnected();
+            if (!wifiConnected) {
+                conHelper.notConnectedMessage();
+            }
         } catch (Exception ex) {
         }
-        if (!wifiConnected) {
-            conHelper.notConnectedMessage();
-            return false;
-        }
-        return true;
+        return !(!wifiConnected || !gpsEnabled);
     }
 }
