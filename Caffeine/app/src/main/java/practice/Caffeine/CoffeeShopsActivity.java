@@ -57,11 +57,6 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         final Integer userID = intent.getIntExtra("userID", 0);
 
 
-        // TODO: finish coding the shops table sync - does it happen after response causing errors of table being empty
-        // should there be a callback implemented?
-        SyncShopsHelper sync = new SyncShopsHelper(this);
-        sync.sync(userID);
-
 
         // Load shops
         prepareShops();

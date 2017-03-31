@@ -22,10 +22,12 @@ public class SyncShopsHelper {
 
 
     public SyncShopsHelper(Context mContext) {
+
         this.mContext = mContext;
     }
 
-    public boolean sync(int userID) {
+
+    public void sync(int userID) {
 
         this.userID = Integer.valueOf(userID);
 
@@ -58,7 +60,7 @@ public class SyncShopsHelper {
                             shop.setPlaceID(jsonShop.getString("placeID"));
                             myDB.addShop(shop);
                         }
-                        Log.d("GetAllshops SyncHelper", myDB.getAllShops().toString());
+                        Log.d("All shops inserted: ", myDB.getAllShops().toString());
 
                     }
 
@@ -71,9 +73,6 @@ public class SyncShopsHelper {
         RequestQueue queue = Volley.newRequestQueue(mContext);
         queue.add(syncRequest);
 
-        DatabaseHelper myDB = new DatabaseHelper(mContext);
-        myDB.getReadableDatabase();
-        return (myDB.getAllShops().size() > 0);
     }
 
 }

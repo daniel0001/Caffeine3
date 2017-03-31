@@ -146,22 +146,21 @@ public class LoginActivity extends AppCompatActivity {
                                 Log.d("userID: ", myDB.getUser(1).getUserID() + "");
 
                                 // Sync the shops table with remote DB
-
-
-                                // Test to see if data inserted into table
-                                if (myDB.getUser(1).getUsername().equals(user.getUsername())) {
-                                        Toast.makeText(LoginActivity.this, "Data Inserted", Toast.LENGTH_LONG).show();
-                                    } else {
-                                        Toast.makeText(LoginActivity.this, "Data not Inserted", Toast.LENGTH_LONG).show();
-                                    }
-
-                                // Set up new intent CoffeeShopsActivity
+                                // TODO: Code to sync shops not happening in sequence - must build the SQLite DB
+                                // before building the CoffeeShops Activity
+                                syncShops(userID);
+                                //Open CoffeeShopsActivity
                                 Intent intent = new Intent(LoginActivity.this, CoffeeShopsActivity.class);
                                 intent.putExtra("userID", userID);
                                 intent.putExtra("name", name);
-
-                                //Open CoffeeShopsActivity
                                 LoginActivity.this.startActivity(intent);
+
+                                // Test to see if data inserted into table
+                                if (myDB.getUser(1).getUsername().equals(user.getUsername())) {
+                                    Toast.makeText(LoginActivity.this, "Data Inserted", Toast.LENGTH_LONG).show();
+                                } else {
+                                    Toast.makeText(LoginActivity.this, "Data not Inserted", Toast.LENGTH_LONG).show();
+                                }
 
                             } else {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
@@ -186,6 +185,15 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    private Boolean syncShops(Integer userID) {
+
+        BackgroundTask sync = new BackgroundTask(this);
+        sync.execute("sync_shops", userID.toString());
+        finish();
+        return true;
+
+
+    }
 
 
     }
