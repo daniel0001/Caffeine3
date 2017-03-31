@@ -16,19 +16,10 @@ public class SyncShopsRequest extends StringRequest {
 
     private Map<String, String> params;
 
-    public SyncShopsRequest(Response.Listener<String> listener, String userID, String shopID, String shopName, String address, String website, String lat, String lng, String placeID, String wifiMAC, String wifiSSID) {
+    public SyncShopsRequest(Response.Listener<String> listener, Integer userID) {
         super(Method.POST, REGISTER_REQUEST_URL, listener, null);
         params = new HashMap<>();
-        params.put("userID", userID);
-        params.put("shopID", shopID);
-        params.put("shopName", shopName);
-        params.put("address", address);
-        params.put("website", website);
-        params.put("lat", lat);
-        params.put("lng", lng);
-        params.put("placeID", placeID);
-        params.put("wifiMAC", wifiMAC);
-        params.put("wifiSSID", wifiSSID);
+        params.put("userID", userID.toString());
     }
 
     public Map<String, String> getParams() {

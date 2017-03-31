@@ -17,7 +17,7 @@ import java.util.List;
 public final class DatabaseHelper extends SQLiteOpenHelper{
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 4;
+    public static final int DATABASE_VERSION = 10;
     public static final String DATABASE_NAME = "myDB.db";
     public static final String TABLE_NAME_USER = "user";
     public static final String TABLE_NAME_SHOPS = "shops";
@@ -55,7 +55,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
 
     private static final String SQL_CREATE_SHOPSTABLE =
             "CREATE TABLE " + TABLE_NAME_SHOPS + " (" +
-                    _ID + " INTEGER PRIMARY KEY," +
+                    _ID + " INTEGER PRIMARY KEY NOT NULL," +
                     COLUMN_NAME_SHOPID + " INTEGER," +
                     COLUMN_NAME_NAME + " TEXT," +
                     COLUMN_NAME_ADDRESS + " TEXT," +
@@ -64,12 +64,14 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
                     COLUMN_NAME_LNG + " TEXT," +
                     COLUMN_NAME_PLACEID + " TEXT," +
                     COLUMN_NAME_WIFIMAC + " TEXT," +
-                    COLUMN_NAME_WIFISSID + " TEXT)";
-    private static final String[] SHOPS_COLUMNS = {_ID, COLUMN_NAME_SHOPID, COLUMN_NAME_NAME, COLUMN_NAME_ADDRESS, COLUMN_NAME_WEBSITE, COLUMN_NAME_LAT, COLUMN_NAME_LNG, COLUMN_NAME_PLACEID, COLUMN_NAME_WIFIMAC, COLUMN_NAME_WIFISSID};
+                    COLUMN_NAME_WIFISSID + " TEXT," +
+                    COLUMN_NAME_PHONE + " TEXT)";
+
+    private static final String[] SHOPS_COLUMNS = {_ID, COLUMN_NAME_SHOPID, COLUMN_NAME_NAME, COLUMN_NAME_ADDRESS, COLUMN_NAME_WEBSITE, COLUMN_NAME_LAT, COLUMN_NAME_LNG, COLUMN_NAME_PLACEID, COLUMN_NAME_WIFIMAC, COLUMN_NAME_WIFISSID, COLUMN_NAME_PHONE};
 
     private static final String SQL_CREATE_VISITSTABLE =
             "CREATE TABLE " + TABLE_NAME_VISITS + " (" +
-                    _ID + " INTEGER PRIMARY KEY," +
+                    _ID + " INTEGER PRIMARY KEY NOT NULL," +
                     COLUMN_NAME_SHOPID + " INTEGER," +
                     COLUMN_NAME_VISITDATE + " TRANSDATE INTEGER)";
     private static final String[] VISITS_COLUMNS = {_ID, COLUMN_NAME_SHOPID, COLUMN_NAME_VISITDATE};
@@ -147,7 +149,9 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         values.put(COLUMN_NAME_PLACEID, shop.getPlaceID());
         values.put(COLUMN_NAME_WIFIMAC, shop.getWifiMAC());
         values.put(COLUMN_NAME_WIFISSID, shop.getWifiSSID());
+        values.put(COLUMN_NAME_PHONE, shop.getPhoneNum());
         long result = db.insert(TABLE_NAME_SHOPS, null, values);
+        Log.d("addShop", result + "");
         return result != -1;
     }
 
@@ -212,6 +216,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
             Log.d("cursor: ", String.valueOf(cursor.getInt(1)));
             // 4. build shop object
             Shop shop = new Shop();
+            shop.setId(cursor.getInt(0));
             shop.setShopID(cursor.getInt(1));
             shop.setName(cursor.getString(2));
             shop.setAddress(cursor.getString(3));
@@ -221,6 +226,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
             shop.setPlaceID(cursor.getString(7));
             shop.setWifiMAC(cursor.getString(8));
             shop.setWifiSSID(cursor.getString(9));
+            shop.setPhoneNum(cursor.getString(10));
             //log
             Log.d("getShop(" + id + ")", shop.toString());
             cursor.close();
@@ -275,23 +281,24 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 shop = new Shop();
-                shop.setShopID(Integer.parseInt(cursor.getString(0)));
-                shop.setName(cursor.getString(1));
-                shop.setAddress(cursor.getString(2));
-                shop.setWebsite(cursor.getString(3));
-                shop.setAddress(cursor.getString(4));
+                shop.setId(cursor.getInt(0));
+                shop.setShopID(cursor.getInt(1));
+                shop.setName(cursor.getString(2));
+                shop.setAddress(cursor.getString(3));
+                shop.setWebsite(cursor.getString(4));
                 shop.setLat(cursor.getString(5));
                 shop.setLng(cursor.getString(6));
                 shop.setPlaceID(cursor.getString(7));
                 shop.setWifiMAC(cursor.getString(8));
                 shop.setWifiSSID(cursor.getString(9));
+                shop.setPhoneNum(cursor.getString(10));
 
                 // Add shop to shops
                 shops.add(shop);
             } while (cursor.moveToNext());
         }
         cursor.close();
-        Log.d("getAllShops()", shops.toString());
+        Log.d("getAllShops DBHelper", shops.toString());
 
         // return shops
         return shops;
@@ -397,6 +404,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         values.put(COLUMN_NAME_PLACEID, shop.getPlaceID());
         values.put(COLUMN_NAME_WIFIMAC, shop.getWifiMAC());
         values.put(COLUMN_NAME_WIFISSID, shop.getWifiSSID());
+        values.put(COLUMN_NAME_PHONE, shop.getPhoneNum());
         // 3. updating row
         int i = db.update(TABLE_NAME_SHOPS, //table
                 values, // column/value

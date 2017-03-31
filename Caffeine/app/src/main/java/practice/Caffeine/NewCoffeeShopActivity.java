@@ -5,8 +5,8 @@ package practice.Caffeine;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteStatement;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -29,6 +29,8 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.net.NetworkInterface;
+import java.util.Collections;
 import java.util.List;
 
 import static com.google.android.gms.location.places.Place.TYPE_CAFE;
@@ -65,6 +67,32 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
 
     private int PLACE_PICKER_REQUEST = 1;
 
+    public static String getMacAddr() {
+        try {
+            List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface nif : all) {
+                if (!nif.getName().equalsIgnoreCase("wlan0")) continue;
+
+                byte[] macBytes = nif.getHardwareAddress();
+                if (macBytes == null) {
+                    return "";
+                }
+
+                StringBuilder res1 = new StringBuilder();
+                for (byte b : macBytes) {
+                    res1.append(String.format("%02X:", b));
+                }
+
+                if (res1.length() > 0) {
+                    res1.deleteCharAt(res1.length() - 1);
+                }
+                return res1.toString();
+            }
+        } catch (Exception ex) {
+        }
+        return "02:00:00:00:00:00";
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,7 +121,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
         wifiInfo = wifiManager.getConnectionInfo();
         if (wifiInfo.getSupplicantState() == SupplicantState.COMPLETED) {
             wifiSSID = wifiInfo.getSSID();
-            wifiMAC = wifiInfo.getMacAddress();
+            wifiMAC = getMacAddr();
         }
         tvWifiSSID.setText(wifiSSID);
 
@@ -169,7 +197,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                                     Shop newShop = new Shop();
                                     // Check if the shop already exists in the SQLite database
                                     // return if true
-                                    if (checkDB(shopID)) {
+                                    if (checkDB(shopID) > 0) {
                                         Toast.makeText(NewCoffeeShopActivity.this, "Shop already registered in your list - please 'Find Shop' again or go back", Toast.LENGTH_LONG).show();
                                         return;
                                     } else {
@@ -210,17 +238,13 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
 
                             // TODO: Below should be reviewed for security issues around SQL injection
 
-                            private boolean checkDB(int shopID) {
+                            private long checkDB(int shopID) {
                                 SQLiteDatabase db = myDB.getReadableDatabase();
                                 String sql = "SELECT * FROM shops WHERE shopID = " + shopID;
-                                SQLiteStatement statement = db.compileStatement(sql);
-                                boolean x;
-                                try {
-                                    x = statement.simpleQueryForLong() > 0;
-                                } finally {
-                                    statement.close();
-                                }
-                                return x;
+                                String[] args = {String.valueOf(shopID)};
+                                long cnt = DatabaseUtils.queryNumEntries(db, "shops", "shopID = ?", args);
+                                db.close();
+                                return cnt;
                             }
                         };
                         NewCoffeeShopRequest newCoffeeShopRequest = new NewCoffeeShopRequest(responseListener, shopName, address, wifiSSID, wifiMAC, lat, lng, shopWeb, phone, userID, placeID);

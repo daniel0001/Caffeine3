@@ -132,33 +132,36 @@ public class LoginActivity extends AppCompatActivity {
                                 }
 
                                 // Enter user Data into SQLite DB 'myDB'
-                                    User user = new User();
-                                    user.setUsername(username);
-                                    user.setUserID(userID);
-                                    user.setName(name);
-                                    user.setEmail(email);
-                                    user.setPassword(password);
-                                    user.setPhone(phone);
+                                User user = new User();
+                                user.setUsername(username);
+                                user.setUserID(userID);
+                                user.setName(name);
+                                user.setEmail(email);
+                                user.setPassword(password);
+                                user.setPhone(phone);
                                 user.setLat(lat);
                                 user.setLng(lng);
                                 myDB.getWritableDatabase();
                                 myDB.addUser(user);
                                 Log.d("userID: ", myDB.getUser(1).getUserID() + "");
 
-                                // Test to see if data inserted into table
-                                if (myDB.getUser(1).getUsername().equals(user.getUsername())) {
-                                        Toast.makeText(LoginActivity.this, "Data Inserted", Toast.LENGTH_LONG).show();
-                                    } else {
-                                        Toast.makeText(LoginActivity.this, "Data not Inserted", Toast.LENGTH_LONG).show();
-                                    }
-
-                                // Set up new intent CoffeeShopsActivity
+                                // Sync the shops table with remote DB
+                                // TODO: Code to sync shops not happening in sequence - must build the SQLite DB
+                                // before building the CoffeeShops Activity
+                                syncShops(userID);
+                                //Open CoffeeShopsActivity
                                 Intent intent = new Intent(LoginActivity.this, CoffeeShopsActivity.class);
                                 intent.putExtra("userID", userID);
                                 intent.putExtra("name", name);
-
-                                //Open CoffeeShopsActivity
                                 LoginActivity.this.startActivity(intent);
+
+                                // Test to see if data inserted into table
+                                if (myDB.getUser(1).getUsername().equals(user.getUsername())) {
+                                    Toast.makeText(LoginActivity.this, "Data Inserted", Toast.LENGTH_LONG).show();
+                                } else {
+                                    Toast.makeText(LoginActivity.this, "Data not Inserted", Toast.LENGTH_LONG).show();
+                                }
+
                             } else {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                                 builder.setMessage("Login Failed")
@@ -182,6 +185,15 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    private Boolean syncShops(Integer userID) {
+
+        BackgroundTask sync = new BackgroundTask(this);
+        sync.execute("sync_shops", userID.toString());
+        finish();
+        return true;
+
+
+    }
 
 
     }

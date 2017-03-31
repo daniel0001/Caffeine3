@@ -15,12 +15,13 @@ public class Shop {
     private String placeID;
     private String wifiMAC;
     private String wifiSSID;
+    private String phoneNum;
 
     public Shop() {
     }
 
 
-    public Shop(int id, int shopID, String name, String address, String website, String lat, String lng, String placeID, String wifiMac, String wifiSSID) {
+    public Shop(int id, int shopID, String name, String address, String website, String lat, String lng, String placeID, String wifiMac, String wifiSSID, String phoneNum) {
         super();
         this.id = id;
         this.shopID = shopID;
@@ -32,6 +33,7 @@ public class Shop {
         this.placeID = placeID;
         this.wifiMAC = wifiMac;
         this.wifiSSID = wifiSSID;
+        this.phoneNum = phoneNum;
 
     }
 
@@ -39,12 +41,16 @@ public class Shop {
         return id;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public int getShopID() {
         return shopID;
     }
 
-    public void setShopID(int ID) {
-        this.shopID = ID;
+    public void setShopID(int shopID) {
+        this.shopID = shopID;
     }
 
     public String getName() {
@@ -111,6 +117,14 @@ public class Shop {
         this.wifiSSID = wifiSSID;
     }
 
+    public String getPhoneNum() {
+        return phoneNum;
+    }
+
+    public void setPhoneNum(String phoneNum) {
+        this.phoneNum = phoneNum;
+    }
+
     @Override
     public String toString() {
         return "Shop{" +
@@ -124,7 +138,9 @@ public class Shop {
                 ", placeID='" + placeID + '\'' +
                 ", wifiMAC='" + wifiMAC + '\'' +
                 ", wifiSSID='" + wifiSSID + '\'' +
+                ", phoneNum='" + phoneNum + '\'' +
                 '}';
     }
+
 
 }
