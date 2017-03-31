@@ -63,7 +63,6 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         sync.sync(userID);
 
 
-
         // Load shops
         prepareShops();
 
