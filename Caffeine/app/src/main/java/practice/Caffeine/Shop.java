@@ -133,8 +133,8 @@ public class Shop {
                 ", name='" + name + '\'' +
                 ", address='" + address + '\'' +
                 ", website='" + website + '\'' +
-                ", lat=" + lat +
-                ", lng=" + lng +
+                ", lat=" + lat + '\'' +
+                ", lng=" + lng + '\'' +
                 ", placeID='" + placeID + '\'' +
                 ", wifiMAC='" + wifiMAC + '\'' +
                 ", wifiSSID='" + wifiSSID + '\'' +

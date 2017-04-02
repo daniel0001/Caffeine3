@@ -5,32 +5,53 @@
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
+    android:screenOrientation="portrait"
               android:weightSum="1"
               tools:context="practice.Caffeine.VisitDetailsActivity">
 
-    <ImageView
-        android:id="@+id/shopInternal"
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/mapView"
+        class="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:srcCompat="@drawable/oak_internal"/>
+        android:layout_height="200dp" />
+
 
     <TextView
         android:id="@+id/tvShopName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TextView"/>
+        android:text="shop name" />
 
     <TextView
         android:id="@+id/tvShopAddress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TextView"/>
+        android:text="address" />
 
     <TextView
         android:id="@+id/tvShopPhone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="TextView"/>
+        android:text="phone" />
+
+
+    <Button
+        android:id="@+id/bAddVisit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Loyalty Point" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/cup_grey_grid_heart_3_wide" />
+
+    <Button
+        android:id="@+id/bRedeemPoints"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Claim Free Coffee" />
 
     <ListView
         android:layout_width="match_parent"

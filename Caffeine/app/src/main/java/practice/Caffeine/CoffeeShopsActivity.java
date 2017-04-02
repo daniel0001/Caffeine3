@@ -18,7 +18,14 @@ import android.util.TypedValue;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -38,6 +45,12 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //Clean DB for rebuild
+        DatabaseHelper myDB = new DatabaseHelper(this);
+        myDB.getWritableDatabase();
+        myDB.deleteAllShops();
+        myDB.deleteAllVisits();
+
 
         initCollapsingToolbar();
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
@@ -56,10 +69,63 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         final String name = intent.getStringExtra("name");
         final Integer userID = intent.getIntExtra("userID", 0);
 
+        Response.Listener<String> syncResponseListener = new Response.Listener<String>() {
 
+            public void onResponse(String response) {
+                try {
+                    Log.d("response: ", response);
+
+                    JSONArray jsonResponse = new JSONArray(response);
+                    Boolean success = jsonResponse.getBoolean(0);
+
+                    int responseSize = jsonResponse.length();
+
+                    DatabaseHelper myDB = new DatabaseHelper(CoffeeShopsActivity.this);
+                    myDB.getWritableDatabase();
+
+                    if (success) {
+                        for (int i = 1; i < responseSize; i++) {
+                            if (jsonResponse.getJSONObject(i).getString("type").equals("shop")) {
+                                Shop shop = new Shop();
+                                JSONObject jsonShop = jsonResponse.getJSONObject(i);
+                                shop.setShopID(jsonShop.getInt("shopID"));
+                                shop.setName(jsonShop.getString("name"));
+                                shop.setWifiMAC(jsonShop.getString("wifiMAC"));
+                                shop.setWifiSSID(jsonShop.getString("wifiSSID"));
+                                shop.setAddress(jsonShop.getString("address"));
+                                shop.setLat(jsonShop.getString("lat"));
+                                shop.setLng(jsonShop.getString("lng"));
+                                shop.setWebsite(jsonShop.getString("website"));
+                                shop.setPhoneNum(jsonShop.getString("phoneNum"));
+                                shop.setPlaceID(jsonShop.getString("placeID"));
+                                myDB.addShop(shop);
+                            }
+                            if (jsonResponse.getJSONObject(i).getString("type").equals("visit")) {
+                                Visit visit = new Visit();
+                                JSONObject jsonVisit = jsonResponse.getJSONObject(i);
+                                visit.setVisitID(jsonVisit.getInt("visitID"));
+                                visit.setShopID(jsonVisit.getInt("shopID"));
+                                visit.setDate(jsonVisit.getString("date"));
+                                myDB.addVisit(visit);
+                            }
+                        }
+                        Log.d("All Shops inserted: ", myDB.getAllShops().toString());
+                        Log.d("All Visits inserted: ", myDB.getAllVisits().toString());
+                        // read from the DB and create shopcards
+                        prepareShops();
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        SyncShopsRequest syncRequest = new SyncShopsRequest(syncResponseListener, userID);
+        RequestQueue queue = Volley.newRequestQueue(CoffeeShopsActivity.this);
+        queue.add(syncRequest);
 
         // Load shops
-        prepareShops();
+
 
         try {
             Glide.with(this).load(R.drawable.love_coffee).into((ImageView) findViewById(R.id.backdrop));
@@ -122,15 +188,19 @@ public class CoffeeShopsActivity extends AppCompatActivity {
 
         int[] shopImages = new int[]{
                 R.drawable.addshop,
-                R.drawable.shop1,
-                R.drawable.shop2,
-                R.drawable.shop3,
-                R.drawable.shop4,
-                R.drawable.shop5,
-                R.drawable.shop6,
+                R.drawable.cup_grey_grid_0,
+                R.drawable.cup_grey_grid_heart_1,
+                R.drawable.cup_grey_grid_heart_2,
+                R.drawable.cup_grey_grid_heart_3,
+                R.drawable.cup_grey_grid_heart_4,
+                R.drawable.cup_grey_grid_heart_5,
+                R.drawable.cup_grey_grid_heart_6,
+                R.drawable.cup_grey_grid_heart_7,
+                R.drawable.cup_grey_grid_heart_8,
+                R.drawable.cup_grey_grid_heart_9,
         };
 
-        ShopCard a = new ShopCard(getString(R.string.add_new_coffee_shop), 0, shopImages[0], null, null);
+        ShopCard a = new ShopCard(getString(R.string.add_new_coffee_shop), 0, shopImages[0], null, null, null, null);
         shopList.add(a);
 
         DatabaseHelper myDB = new DatabaseHelper(this);
@@ -146,10 +216,6 @@ public class CoffeeShopsActivity extends AppCompatActivity {
             CoffeeShopsActivity.this.startActivity(intent);
         } else {
             // Read from Local SQLite db to populate shop list
-
-            Log.d("CoffeeActivity: ", myDB.getAllShops().toString());
-            Shop shop1 = myDB.getShop(1);
-
             if (0 < myDB.getAllShops().size()) {
                 for (int i = 1; i <= myDB.getAllShops().size(); i++) {
                     ShopCard shopCard = new ShopCard();
@@ -158,8 +224,10 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                     shopCard.setName(shop.getName());
                     shopCard.setShopPhone(shop.getPhoneNum());
                     shopCard.setShopAddress(shop.getAddress());
-                    shopCard.setNumOfVisits(visitCount(shop.getShopID() % MAX_VISITS_PER_FREE_COFFEE));
-                    shopCard.setShopImage(shopImages[(i % 6) + 1]);
+                    shopCard.setNumOfVisits(visitCount(shop.getShopID()) % MAX_VISITS_PER_FREE_COFFEE);
+                    shopCard.setShopImage(shopImages[visitCount(shop.getShopID()) + 1]);
+                    shopCard.setLat(Double.valueOf(shop.getLat()));
+                    shopCard.setLng(Double.valueOf(shop.getLng()));
                     shopList.add(shopCard);
                 }
                 adapter.notifyDataSetChanged();
@@ -172,7 +240,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         DatabaseHelper myDB = new DatabaseHelper(this);
         myDB.getReadableDatabase();
         int visitCount = 0;
-        for (int i = 0; i < myDB.getAllVisits().size(); i++) {
+        for (int i = 1; i < myDB.getAllVisits().size(); i++) {
             Visit visit = myDB.getVisit(i);
             if (visit.getShopID() == shopID) visitCount++;
         }

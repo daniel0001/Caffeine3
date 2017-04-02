@@ -45,7 +45,14 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> 
 
         final ShopCard shopCard = shopList.get(position);
         holder.title.setText(shopCard.getName());
-        holder.visits.setText(shopCard.getNumOfVisits() + " visits");
+        final Boolean addNewShop = (shopCard.getName() == mContext.getString(R.string.add_new_coffee_shop));
+
+        if (addNewShop) {
+            holder.visits.setText("");
+
+        } else {
+            holder.visits.setText(shopCard.getNumOfVisits() + " out of 9 Points Collected");
+        }
 
         // loading shop card using Glide library
         Glide.with(mContext).load(shopCard.getShopImage()).into(holder.thumbnail);
@@ -58,7 +65,7 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> 
                 int userID = user.getUserID();
                 String name = user.getName();
 
-                if (shopCard.getName() == mContext.getString(R.string.add_new_coffee_shop)) {
+                if (addNewShop) {
                     Intent intent = new Intent(mContext, NewCoffeeShopActivity.class);
                     intent.putExtra("userID", userID);
                     intent.putExtra("name", name);
@@ -70,6 +77,8 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> 
                     intent.putExtra("shopName", shopCard.getName());
                     intent.putExtra("shopAddress", shopCard.getShopAddress());
                     intent.putExtra("shopPhone", shopCard.getShopPhone());
+                    intent.putExtra("lat", shopCard.getLat());
+                    intent.putExtra("lng", shopCard.getLng());
                     mContext.startActivity(intent);
                 }
             }

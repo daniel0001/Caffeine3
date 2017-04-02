@@ -35,6 +35,7 @@
     <string name="backdrop_subtitle">My Loyalty Points</string>
     <string name="wifi_not_connected">Wifi not connected</string>
     <string name="open_wifi_settings">Open wifi settings</string>
+    <string name="title_activity_shop_map">Map</string>
 
 
 </resources>

@@ -7,14 +7,16 @@ package practice.Caffeine;
 public class Visit {
 
     private int id;
-    private Long date;
+    private int visitID;
+    private String date;
     private int shopID;
 
     public Visit() {
     }
 
-    public Visit(Long date, int shopID) {
+    public Visit(int visitID, String date, int shopID) {
         super();
+        this.visitID = visitID;
         this.date = date;
         this.shopID = shopID;
     }
@@ -28,11 +30,19 @@ public class Visit {
         this.id = id;
     }
 
-    public Long getDate() {
+    public int getVisitID() {
+        return visitID;
+    }
+
+    public void setVisitID(int visitID) {
+        this.visitID = visitID;
+    }
+
+    public String getDate() {
         return date;
     }
 
-    public void setDate(Long date) {
+    public void setDate(String date) {
         this.date = date;
     }
 
@@ -44,14 +54,17 @@ public class Visit {
         this.shopID = shopID;
     }
 
+
     @Override
     public String toString() {
         return "Visit{" +
                 "id=" + id +
+                ", visitID=" + visitID +
                 ", date=" + date +
                 ", shopID=" + shopID +
                 '}';
     }
+
 }
 
 

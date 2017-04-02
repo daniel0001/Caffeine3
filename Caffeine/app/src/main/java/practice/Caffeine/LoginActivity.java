@@ -145,10 +145,6 @@ public class LoginActivity extends AppCompatActivity {
                                 myDB.addUser(user);
                                 Log.d("userID: ", myDB.getUser(1).getUserID() + "");
 
-                                // Sync the shops table with remote DB
-                                // TODO: Code to sync shops not happening in sequence - must build the SQLite DB
-                                // before building the CoffeeShops Activity
-                                syncShops(userID);
                                 //Open CoffeeShopsActivity
                                 Intent intent = new Intent(LoginActivity.this, CoffeeShopsActivity.class);
                                 intent.putExtra("userID", userID);
@@ -184,17 +180,6 @@ public class LoginActivity extends AppCompatActivity {
 
 
     }
-
-    private Boolean syncShops(Integer userID) {
-
-        BackgroundTask sync = new BackgroundTask(this);
-        sync.execute("sync_shops", userID.toString());
-        finish();
-        return true;
-
-
-    }
-
 
     }
 

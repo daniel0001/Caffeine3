@@ -10,16 +10,21 @@ public class ShopCard {
     private int shopImage;
     private String shopAddress;
     private String shopPhone;
+    private Double lat;
+    private Double lng;
 
     public ShopCard() {
     }
 
-    public ShopCard(String name, int numOfVisits, int shopImage, String shopAddress, String shopPhone) {
+    public ShopCard(String name, int numOfVisits, int shopImage, String shopAddress, String shopPhone, Double lat, Double lng) {
         this.name = name;
         this.numOfVisits = numOfVisits;
         this.shopImage = shopImage;
         this.shopAddress = shopAddress;
         this.shopPhone = shopPhone;
+        this.lat = lat;
+        this.lng = lng;
+
     }
 
     public String getName() {
@@ -60,5 +65,21 @@ public class ShopCard {
 
     public void setShopPhone(String shopPhone) {
         this.shopPhone = shopPhone;
+    }
+
+    public Double getLat() {
+        return lat;
+    }
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public Double getLng() {
+        return lng;
+    }
+
+    public void setLng(Double lng) {
+        this.lng = lng;
     }
 }

@@ -17,7 +17,7 @@ import java.util.List;
 public final class DatabaseHelper extends SQLiteOpenHelper{
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 10;
+    public static final int DATABASE_VERSION = 11;
     public static final String DATABASE_NAME = "myDB.db";
     public static final String TABLE_NAME_USER = "user";
     public static final String TABLE_NAME_SHOPS = "shops";
@@ -31,6 +31,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
 
     public static final String COLUMN_NAME_EMAIL = "email";
     public static final String COLUMN_NAME_VISITDATE = "visitDate";
+    public static final String COLUMN_NAME_VISITID = "visitID";
     public static final String COLUMN_NAME_SHOPID = "shopID";
     public static final String COLUMN_NAME_ADDRESS = "address";
     public static final String COLUMN_NAME_WEBSITE = "website";
@@ -72,9 +73,10 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
     private static final String SQL_CREATE_VISITSTABLE =
             "CREATE TABLE " + TABLE_NAME_VISITS + " (" +
                     _ID + " INTEGER PRIMARY KEY NOT NULL," +
+                    COLUMN_NAME_VISITID + " INTEGER," +
                     COLUMN_NAME_SHOPID + " INTEGER," +
-                    COLUMN_NAME_VISITDATE + " TRANSDATE INTEGER)";
-    private static final String[] VISITS_COLUMNS = {_ID, COLUMN_NAME_SHOPID, COLUMN_NAME_VISITDATE};
+                    COLUMN_NAME_VISITDATE + " TEXT)";
+    private static final String[] VISITS_COLUMNS = {_ID, COLUMN_NAME_VISITID, COLUMN_NAME_SHOPID, COLUMN_NAME_VISITDATE};
 
     private static final String SQL_DELETE_USERTABLE = "DROP TABLE IF EXISTS " + TABLE_NAME_USER;
     private static final String SQL_DELETE_SHOPSTABLE = "DROP TABLE IF EXISTS " + TABLE_NAME_SHOPS;
@@ -129,6 +131,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         Log.d("addVisit", visit.toString());
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
+        values.put(COLUMN_NAME_VISITID, visit.getVisitID());
         values.put(COLUMN_NAME_SHOPID, visit.getShopID());
         values.put(COLUMN_NAME_VISITDATE, visit.getDate());
         long result = db.insert(TABLE_NAME_VISITS, null, values);
@@ -241,7 +244,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         SQLiteDatabase db = this.getReadableDatabase();
         // 2. build query
         Cursor cursor =
-                db.query(TABLE_NAME_SHOPS, // a. table
+                db.query(TABLE_NAME_VISITS, // a. table
                         VISITS_COLUMNS, // b. column names
                         " id = ?", // c. selections
                         new String[]{String.valueOf(id)}, // d. selections args
@@ -255,8 +258,9 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         // 4. build visit object
         Visit visit = new Visit();
         visit.setID(Integer.parseInt(cursor.getString(0)));
-        visit.setShopID(Integer.parseInt(cursor.getString(1)));
-        visit.setDate(Long.parseLong(cursor.getString(2)));
+        visit.setVisitID(Integer.parseInt(cursor.getString(1)));
+        visit.setShopID(Integer.parseInt(cursor.getString(2)));
+        visit.setDate(cursor.getString(3));
         //log
         Log.d("getVisit(" + id + ")", visit.toString());
         cursor.close();
@@ -317,8 +321,9 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
             do {
                 visit = new Visit();
                 visit.setID(Integer.parseInt(cursor.getString(0)));
-                visit.setShopID(Integer.parseInt(cursor.getString(1)));
-                visit.setDate(Long.parseLong(cursor.getString(2)));
+                visit.setVisitID(Integer.parseInt(cursor.getString(1)));
+                visit.setShopID(Integer.parseInt(cursor.getString(2)));
+                visit.setDate(cursor.getString(3));
 
                 // Add shop to shops
                 visits.add(visit);
