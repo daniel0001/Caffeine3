@@ -64,6 +64,7 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
     public void onMapReady(GoogleMap map) {
 
         map.addMarker(new MarkerOptions().position(shopLatLng).title(shopName));
+        map.getUiSettings().setMapToolbarEnabled(true);
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(shopLatLng) // Center Set
                 .zoom(18.0f)                // Zoom
