@@ -7,10 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -114,6 +117,17 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
 
         // Store shops to shopDB SQLite
         final DatabaseHelper myDB = new DatabaseHelper(this);
+
+        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mWifi = connManager.getActiveNetworkInfo();
+
+        if (!mWifi.isConnected()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(NewCoffeeShopActivity.this);
+            builder.setMessage("***Sign in to wifi*** \n \nLove Coffee allows you collect all your coffee loyalty card points in one place. \n\nTo use Love Coffee you must be signed in to the Coffee Shop's wifi as this is how Love Coffee knows to give you a loyalty point.  \n\nPlease check with a member of staff in your current shop what their Wifi login details and Wifi password are, then login to their wifi to proceed. \n\n Please note, you can only collect 1 point each day. Please visit www.lovecoffee.ie for more details.")
+                    .setNegativeButton("Ok", null)
+                    .create()
+                    .show();
+        }
 
         // get the current logged in wifi SSID and display in tvWifiSSID
         WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);

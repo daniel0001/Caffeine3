@@ -236,6 +236,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         }
     }
 
+
     private int visitCount(int shopID) {
         DatabaseHelper myDB = new DatabaseHelper(this);
         myDB.getReadableDatabase();

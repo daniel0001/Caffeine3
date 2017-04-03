@@ -37,6 +37,13 @@
     <string name="open_wifi_settings">Open wifi settings</string>
     <string name="title_activity_shop_map">Map</string>
 
+    <string name="funny_neg_1">You\'ve got to catch them all!</string>
+    <string name="funny_neg_2">Hold up! Not enough points!</string>
+    <string name="funny_neg_3">Now, now, you didn\'t think you\'d get a freebie did you?</string>
+    <string name="funny_neg_4">So close and yet so far!</string>
+    <string name="funny_neg_5">Points mean prizes!</string>
 
+    <string name="barista_instructions">Please let me claim my free coffee and then hit the button below to reset my points back to 0 out of 9</string>
+    <string name="barista_button">Coffee Claimed at Counter - Reset button</string>
 </resources>
 

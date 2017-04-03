@@ -56,7 +56,7 @@
 
 
     <Button
-        android:id="@+id/bAddVisit"
+        android:id="@+id/bAddPoint"
         android:layout_width="250sp"
         android:layout_height="wrap_content"
         android:layout_below="@id/tvShopPhone"
@@ -67,8 +67,11 @@
         android:id="@+id/ivPointsWide"
         android:layout_width="match_parent"
         android:layout_height="80sp"
-        android:layout_below="@id/bAddVisit"
-        app:srcCompat="@drawable/cup_grey_grid_heart_3_wide" />
+        android:layout_below="@id/bAddPoint"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+
+        />
 
     <Button
         android:id="@+id/bRedeemPoints"

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:screenOrientation="portrait"
+                android:weightSum="1"
+                tools:context="practice.Caffeine.RedeemCoffeeActivity">
+
+    <ImageView
+        android:id="@+id/ivBigHeartCup"
+        android:layout_width="0dp"
+        android:layout_height="600dp"
+        android:layout_alignParentTop="true"
+        android:contentDescription="BigYellowCup"
+        app:srcCompat="@drawable/cup_yellow_heart"
+        />
+
+    <TextView
+        android:id="@+id/tvBaristaInstructions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ivBigHeartCup"
+        android:layout_centerInParent="true"
+        android:text="@string/barista_instructions"
+
+        />
+
+    <Button
+        android:id="@+id/bBaristaButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvBaristaInstructions"
+        android:layout_centerInParent="true"
+        android:text="@string/barista_button"
+        />
+</RelativeLayout>

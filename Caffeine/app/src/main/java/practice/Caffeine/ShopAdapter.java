@@ -49,7 +49,6 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> 
 
         if (addNewShop) {
             holder.visits.setText("");
-
         } else {
             holder.visits.setText(shopCard.getNumOfVisits() + " out of 9 Points Collected");
         }
@@ -79,6 +78,7 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> 
                     intent.putExtra("shopPhone", shopCard.getShopPhone());
                     intent.putExtra("lat", shopCard.getLat());
                     intent.putExtra("lng", shopCard.getLng());
+                    intent.putExtra("visitCount", shopCard.getNumOfVisits());
                     mContext.startActivity(intent);
                 }
             }
