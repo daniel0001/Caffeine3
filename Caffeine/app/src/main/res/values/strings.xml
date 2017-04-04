@@ -13,6 +13,8 @@
     <string name="user_details">User Details</string>
     <string name="register_here">I\'m new here. Hook me up!</string>
     <string name="add_new_coffee_shop">Add New Coffee Shop</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
 
     <string name="plus_sign">+</string>
     <string name="wifi_SSID_check">Please switch on your wifi</string>
@@ -37,13 +39,22 @@
     <string name="open_wifi_settings">Open wifi settings</string>
     <string name="title_activity_shop_map">Map</string>
 
+
+    <string name="funny_neg_visit_1">Not today my friend. Looks like you\'ve already scored here today</string>
+    <string name="funny_neg_visit_2">Ehhm, I\'ve just checked and we\'re already on the scoreboard for today</string>
+    <string name="funny_neg_visit_3">Woah, groundhog day! We\'ve already scored today!</string>
+    <string name="funny_neg_visit_4">Sorry, only one point per day</string>
+    <string name="funny_neg_visit_5">Love Coffee only rewards you once a day</string>
     <string name="funny_neg_1">You\'ve got to catch them all!</string>
     <string name="funny_neg_2">Hold up! Not enough points!</string>
     <string name="funny_neg_3">Now, now, you didn\'t think you\'d get a freebie did you?</string>
     <string name="funny_neg_4">So close and yet so far!</string>
     <string name="funny_neg_5">Points mean prizes!</string>
 
-    <string name="barista_instructions">Please let me claim my free coffee and then hit the button below to reset my points back to 0 out of 9</string>
-    <string name="barista_button">Coffee Claimed at Counter - Reset button</string>
+
+    <string name="barista_instructions">Congratulations! \n\n You have collected 9 out of 9 Love Coffee Loyalty points. \n\n Please show this to a staff member before claiming your free coffee. They must click the Barista Button to reset your points.</string>
+    <string name="barista_button">Barista Reset Button \n Coffee Claimed at Counter</string>
+    <string name="click_above">Click on cups above to view dates of points collected in:</string>
+    <string name="barista_button_warning">***Redeem Coffee!*** \n \nPlease select \'Ok\' if you wish to proceed with redeeming the free coffee OR \'Cancel\' if you hit this button in error.</string>
 </resources>
 

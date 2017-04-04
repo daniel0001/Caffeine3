@@ -1,14 +1,26 @@
 package practice.Caffeine;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -19,6 +31,10 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONObject;
+
+import java.util.Calendar;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -27,13 +43,13 @@ import java.util.Random;
 
 public class VisitDetailsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private final int MIN_NUMBER_POINTS = 8;
+    private final int MAX_NUMBER_POINTS = 9;   // The Max + 1 Visit is when the user redeems the free coffee
     private String userName;
     private int userID;
     private String shopName;
     private String shopPhone;
     private String shopAddress;
-    private int visitCount;
+    private int pointCount;
     private TextView tvShopName;
     private TextView tvShopPhone;
     private TextView tvShopAddress;
@@ -45,7 +61,15 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
     private Double lng;
     private LatLng shopLatLng;
     private GoogleMap map;
-    private Intent intent;
+    private int shopID;
+    private Visit visit;
+    private Integer LOCATION_REFRESH_TIME = 5000;
+    private Integer LOCATION_REFRESH_DISTANCE = 0;
+    private LocationManager locationManager;
+    private LocationListener locationListener;
+    private DatabaseHelper myDB;
+    private boolean gpsEnabled;
+    private boolean wifiConnected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,13 +81,15 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
         mapFragment.getMapAsync(this);
 
         // intent data passed in by the shopadapter thumbnail.onClickListener
-        intent = getIntent();
+        Intent intent = getIntent();
         userName = intent.getStringExtra("name");
         userID = intent.getIntExtra("userID", 0);
         lat = intent.getDoubleExtra("lat", 0);
         lng = intent.getDoubleExtra("lng", 0);
-        visitCount = intent.getIntExtra("visitCount", 0);
+        pointCount = intent.getIntExtra("pointCount", 0);
         shopLatLng = new LatLng(lat, lng);
+        gpsEnabled = false;
+        wifiConnected = false;
 
         tvShopName = (TextView) findViewById(R.id.tvShopName);
         tvShopAddress = (TextView) findViewById(R.id.tvShopAddress);
@@ -73,22 +99,149 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
         shopName = intent.getStringExtra("shopName");
         shopAddress = intent.getStringExtra("shopAddress");
         shopPhone = intent.getStringExtra("shopPhone");
+        shopID = intent.getIntExtra("shopID", 0);
         tvShopName.setText(shopName);
         tvShopPhone.setText(shopPhone);
         tvShopAddress.setText(shopAddress);
 
+
         // Button Add Point - check if in shop using GPS, check if already at 9 points,
         // check if point already collected in same calendar day (only 1 point per day allowed)
+        // User NOT able to add point if not redeemed when MAZ_NUMBER_POINTS reached - achieved by redirecting
+        // to RedeemCoffeeActivity onClick
 
         bAddPoint = (Button) findViewById(R.id.bAddPoint);
+        if (pointCount == MAX_NUMBER_POINTS) {
+            bAddPoint.setTextColor(R.color.light_grey);
+            bAddPoint.setBackgroundColor(R.color.dark_grey);
+        }
 
+        locationChecker();
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+            }
+
+            @Override
+            public void onStatusChanged(String s, int i, Bundle bundle) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String s) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String s) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+        };
+
+        bAddPoint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Boolean locCheck = false; // This checks if the GPS matches (if it does then add point and move back to CoffeeShopActivity)
+                Boolean dateCheck = true; // Checks if current date is same as lastvisit date (true if same)
+                Calendar calendar = Calendar.getInstance();
+                String currentDate = String.valueOf(calendar.get(Calendar.YEAR)) + "-" + String.valueOf(calendar.get(Calendar.MONTH) + 1) + "-" + String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+                Log.d("CurrentDate: ", String.valueOf(currentDate));
+
+                myDB = new DatabaseHelper(VisitDetailsActivity.this);
+                myDB.getReadableDatabase();
+                List<Visit> visitList = myDB.getAllVisits();
+
+
+                int x = visitList.size();
+                for (int i = 0; i < visitList.size(); i++) {
+                    visit = visitList.get(x - i - 1);
+                    String visitDate = visit.getDate();
+                    visitDate = visitDate.substring(0, visitDate.indexOf(" "));
+
+                    if (visit.getShopID() == shopID && visitDate != currentDate) {
+                        dateCheck = false;
+                        break;
+                    }
+                }
+
+
+                // Check that location is switched on and internet connected
+                CheckConnectedHelper checkConnectedHelper = new CheckConnectedHelper(VisitDetailsActivity.this);
+                if (!checkConnectedHelper.checkConnected(gpsEnabled, wifiConnected)) return;
+
+
+                //Get latitude and longitude of user to find out where they are when registering
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener);
+                Log.d("location : ", locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) + "");
+                Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                Double userLat = location.getLatitude();
+                Double userLng = location.getLongitude();
+                userLat = (double) Math.round(userLat * 10000);      // this cuts down the GPS coordinates to match with the DB ie. lat 53.3811 lng -6.5923
+                userLng = (double) Math.round(userLng * 10000);
+                lat = (double) Math.round(lat * 10000);
+                lng = (double) Math.round(lng * 10000);
+
+
+                if (userLat.equals(lat) && userLng.equals(lng)) locCheck = true;
+
+                if (locCheck && !dateCheck) {
+
+                    Response.Listener<String> listener = new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+
+                            try {
+                                Log.d("fixme", response);
+                                JSONObject jsonResponse = new JSONObject(response);
+                                boolean success = jsonResponse.getBoolean("success");
+
+                                if (success) {
+                                    Intent intent = new Intent(VisitDetailsActivity.this, CoffeeShopsActivity.class);
+                                    intent.putExtra("name", userName);
+                                    intent.putExtra("userID", userID);
+                                    VisitDetailsActivity.this.startActivity(intent);
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                    };
+                    AddVisitRequest addVisitRequest = new AddVisitRequest(listener, String.valueOf(shopID), String.valueOf(userID));
+                    RequestQueue queue = Volley.newRequestQueue(VisitDetailsActivity.this);
+                    queue.add(addVisitRequest);
+
+                } else {
+                    String[] funnyNegStrings = new String[]{ // Strings to tell the user that they don't have enough points
+                            getString(R.string.funny_neg_visit_1),
+                            getString(R.string.funny_neg_visit_2),
+                            getString(R.string.funny_neg_visit_3),
+                            getString(R.string.funny_neg_visit_4),
+                            getString(R.string.funny_neg_visit_5)
+                    };
+                    Random random = new Random();
+                    int max = 4;
+                    int y = random.nextInt(max);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(VisitDetailsActivity.this);
+                    builder.setMessage(funnyNegStrings[y])
+                            .setNegativeButton("Ok", null)
+                            .create()
+                            .show();
+
+
+                }
+            }
+        });
 
         bClaimCoffee = (Button) findViewById(R.id.bRedeemPoints);
-        if (visitCount <= MIN_NUMBER_POINTS) {
+        if (pointCount < MAX_NUMBER_POINTS) {
             bClaimCoffee.setTextColor(R.color.light_grey);
             bClaimCoffee.setBackgroundColor(R.color.dark_grey);
         }
-        if (visitCount == MIN_NUMBER_POINTS + 1) {
+        if (pointCount == MAX_NUMBER_POINTS) {
             bClaimCoffee.setTextColor(R.color.white);
             bClaimCoffee.setBackgroundColor(R.color.red);
         }
@@ -97,7 +250,7 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
         bClaimCoffee.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (visitCount == MIN_NUMBER_POINTS + 1) {
+                if (pointCount == MAX_NUMBER_POINTS) {
                     Intent intent = new Intent(VisitDetailsActivity.this, RedeemCoffeeActivity.class);
                     intent.putExtra("name", userName);
                     intent.putExtra("userID", userID);
@@ -106,7 +259,7 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
                     intent.putExtra("shopPhone", shopPhone);
                     intent.putExtra("lat", lat);
                     intent.putExtra("lng", lng);
-                    intent.putExtra("visitCount", visitCount);
+                    intent.putExtra("pointCount", pointCount);
                     VisitDetailsActivity.this.startActivity(intent);
 
                 } else {
@@ -129,7 +282,7 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
             }
         });
 
-        // Create array of shopImages and change image depending on number of visits from visitCount
+        // Create array of shopImages and change image depending on number of visits from pointCount
         int[] shopImages = new int[]{
                 R.drawable.cup_grey_grid_0_wide,
                 R.drawable.cup_grey_grid_heart_1_wide,
@@ -142,7 +295,7 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
                 R.drawable.cup_grey_grid_heart_8_wide,
                 R.drawable.cup_grey_grid_heart_9_wide,
         };
-        Glide.with(this).load(shopImages[visitCount]).into(ivVisitCount);
+        Glide.with(this).load(shopImages[pointCount]).into(ivVisitCount);
 
         ivVisitCount.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -155,7 +308,7 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
                 intent.putExtra("shopPhone", shopPhone);
                 intent.putExtra("lat", lat);
                 intent.putExtra("lng", lng);
-                intent.putExtra("visitCount", visitCount);
+                intent.putExtra("pointCount", pointCount);
                 VisitDetailsActivity.this.startActivity(intent);
             }
         });
@@ -181,5 +334,28 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
 
     }
 
+    public void locationChecker() {
+        // check for permissions to use GPS location
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{
+                        android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                        android.Manifest.permission.INTERNET
+                }, 10);
+            }
+            return;     // If no permission granted return
+        }
+    }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        switch (requestCode) {
+            case 10:
+                locationChecker();
+                break;
+            default:
+                break;
+        }
+    }
 
 }

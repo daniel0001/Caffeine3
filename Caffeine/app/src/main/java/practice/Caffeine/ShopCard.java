@@ -6,25 +6,26 @@ package practice.Caffeine;
 
 public class ShopCard {
     private String name;
-    private int numOfVisits;
+    private int numPoints;
     private int shopImage;
     private String shopAddress;
     private String shopPhone;
     private Double lat;
     private Double lng;
+    private int shopID;
 
     public ShopCard() {
     }
 
-    public ShopCard(String name, int numOfVisits, int shopImage, String shopAddress, String shopPhone, Double lat, Double lng) {
+    public ShopCard(String name, int numPoints, int shopImage, String shopAddress, String shopPhone, Double lat, Double lng, int shopID) {
         this.name = name;
-        this.numOfVisits = numOfVisits;
+        this.numPoints = numPoints;
         this.shopImage = shopImage;
         this.shopAddress = shopAddress;
         this.shopPhone = shopPhone;
         this.lat = lat;
         this.lng = lng;
-
+        this.shopID = shopID;
     }
 
     public String getName() {
@@ -35,12 +36,12 @@ public class ShopCard {
         this.name = name;
     }
 
-    public int getNumOfVisits() {
-        return numOfVisits;
+    public int getNumPoints() {
+        return numPoints;
     }
 
-    public void setNumOfVisits(int numOfSongs) {
-        this.numOfVisits = numOfSongs;
+    public void setNumPoints(int numOfSongs) {
+        this.numPoints = numOfSongs;
     }
 
     public int getShopImage() {
@@ -81,5 +82,13 @@ public class ShopCard {
 
     public void setLng(Double lng) {
         this.lng = lng;
+    }
+
+    public int getShopID() {
+        return shopID;
+    }
+
+    public void setShopID(int shopID) {
+        this.shopID = shopID;
     }
 }

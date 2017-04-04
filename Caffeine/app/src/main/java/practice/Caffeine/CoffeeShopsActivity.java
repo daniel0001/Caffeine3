@@ -32,7 +32,7 @@ import java.util.ArrayList;
 
 public class CoffeeShopsActivity extends AppCompatActivity {
 
-    private static final int MAX_VISITS_PER_FREE_COFFEE = 9;
+    private static final int MAX_VISITS_FOR_FREE_COFFEE = 9; // The Max + 1 Visit is when the user redeems the free coffee
     private RecyclerView recyclerView;
     private ShopAdapter adapter;
     private ArrayList<ShopCard> shopList;
@@ -200,7 +200,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                 R.drawable.cup_grey_grid_heart_9,
         };
 
-        ShopCard a = new ShopCard(getString(R.string.add_new_coffee_shop), 0, shopImages[0], null, null, null, null);
+        ShopCard a = new ShopCard(getString(R.string.add_new_coffee_shop), 0, shopImages[0], null, null, null, null, 0);
         shopList.add(a);
 
         DatabaseHelper myDB = new DatabaseHelper(this);
@@ -224,10 +224,11 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                     shopCard.setName(shop.getName());
                     shopCard.setShopPhone(shop.getPhoneNum());
                     shopCard.setShopAddress(shop.getAddress());
-                    shopCard.setNumOfVisits(visitCount(shop.getShopID()) % MAX_VISITS_PER_FREE_COFFEE);
-                    shopCard.setShopImage(shopImages[visitCount(shop.getShopID()) + 1]);
+                    shopCard.setNumPoints(pointCount(shop.getShopID()));
+                    shopCard.setShopImage(shopImages[pointCount(shop.getShopID()) + 1]);
                     shopCard.setLat(Double.valueOf(shop.getLat()));
                     shopCard.setLng(Double.valueOf(shop.getLng()));
+                    shopCard.setShopID(shop.getShopID());
                     shopList.add(shopCard);
                 }
                 adapter.notifyDataSetChanged();
@@ -236,8 +237,13 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         }
     }
 
-
-    private int visitCount(int shopID) {
+    // pointCount() calculates the number of points collected by the user/
+    // The Max + 1 Visit is when the user redeems the free coffee so that is why
+    // pointCount = visitCount % MAX_VISITS_FOR_FREE_COFFEE + 1 or (visitCount % 10 points) if Max = 9
+    // The user will be locked into collecting the free coffee before registering further points to avoid
+    // overflow of points - alternative solution would be to implement a 'Redeemed Points' table and log
+    // how many free 'credits' the user has collected. As this is extra work we are just going for MVP.
+    private int pointCount(int shopID) {
         DatabaseHelper myDB = new DatabaseHelper(this);
         myDB.getReadableDatabase();
         int visitCount = 0;
@@ -245,7 +251,8 @@ public class CoffeeShopsActivity extends AppCompatActivity {
             Visit visit = myDB.getVisit(i);
             if (visit.getShopID() == shopID) visitCount++;
         }
-        return visitCount;
+        int pointCount = visitCount % MAX_VISITS_FOR_FREE_COFFEE + 1;
+        return pointCount;
     }
 
     /**

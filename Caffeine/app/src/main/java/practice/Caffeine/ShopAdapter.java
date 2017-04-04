@@ -24,6 +24,7 @@ import java.util.List;
 
 public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> {
 
+    private static final int MAX_VISITS_FOR_FREE_COFFEE = 9;
     private Context mContext;
     private List<ShopCard> shopList;
 
@@ -50,7 +51,7 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> 
         if (addNewShop) {
             holder.visits.setText("");
         } else {
-            holder.visits.setText(shopCard.getNumOfVisits() + " out of 9 Points Collected");
+            holder.visits.setText(shopCard.getNumPoints() + " out of 9 Points Collected");
         }
 
         // loading shop card using Glide library
@@ -78,7 +79,8 @@ public class ShopAdapter extends RecyclerView.Adapter<ShopAdapter.MyViewHolder> 
                     intent.putExtra("shopPhone", shopCard.getShopPhone());
                     intent.putExtra("lat", shopCard.getLat());
                     intent.putExtra("lng", shopCard.getLng());
-                    intent.putExtra("visitCount", shopCard.getNumOfVisits());
+                    intent.putExtra("pointCount", (shopCard.getNumPoints()));
+                    intent.putExtra("shopID", shopCard.getShopID());
                     mContext.startActivity(intent);
                 }
             }

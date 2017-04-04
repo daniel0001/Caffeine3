@@ -80,8 +80,6 @@ public class RegisterActivity extends AppCompatActivity {
         lat = null;
         lng = null;
 
-        // TODO: get the location as a String here: probably requires location manager and permissions to be granted
-
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
