@@ -49,5 +49,7 @@ public class IsWifiConnectedHelper {
         });
         dialogConnect.show();
     }
+
+
 }
 

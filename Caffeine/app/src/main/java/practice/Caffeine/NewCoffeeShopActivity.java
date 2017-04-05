@@ -239,7 +239,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                                         if (shopExists) {
                                             Toast.makeText(NewCoffeeShopActivity.this, "Shop added to your Love Coffee cards.", Toast.LENGTH_LONG).show();
                                         } else {
-                                            nextIntent.putExtra("firstEverShopAdd", true);
+                                            nextIntent.putExtra("firstEverShopAdded", true);
                                         }
                                         nextIntent.putExtra("userID", userID);
                                         nextIntent.putExtra("name", name);

@@ -36,6 +36,8 @@ public class CoffeeShopsActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ShopAdapter adapter;
     private ArrayList<ShopCard> shopList;
+    private String name;
+    private Integer userID;
 
 
     @Override
@@ -66,8 +68,8 @@ public class CoffeeShopsActivity extends AppCompatActivity {
 
         // Variables passed to this activity from Login
         Intent intent = getIntent();
-        final String name = intent.getStringExtra("name");
-        final Integer userID = intent.getIntExtra("userID", 0);
+        name = intent.getStringExtra("name");
+        userID = intent.getIntExtra("userID", 0);
 
         Response.Listener<String> syncResponseListener = new Response.Listener<String>() {
 
@@ -111,9 +113,10 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                         }
                         Log.d("All Shops inserted: ", myDB.getAllShops().toString());
                         Log.d("All Visits inserted: ", myDB.getAllVisits().toString());
-                        // read from the DB and create shopcards
-                        prepareShops();
+
                     }
+                    myDB.close();
+                    prepareShops();
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -136,7 +139,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         // Variable passed to this activity from NewCoffeeShopActivity
         // check if this the first ever addition of this shop
         // and reward user with congrats message
-        final Boolean firstTimeShopAdded = intent.getBooleanExtra("firstEverShopAdd", false);
+        final Boolean firstTimeShopAdded = intent.getBooleanExtra("firstEverShopAdded", false);
 
         if (firstTimeShopAdded) {
             AlertDialog.Builder builder = new AlertDialog.Builder(CoffeeShopsActivity.this);
@@ -203,9 +206,6 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         ShopCard a = new ShopCard(getString(R.string.add_new_coffee_shop), 0, shopImages[0], null, null, null, null, 0);
         shopList.add(a);
 
-        DatabaseHelper myDB = new DatabaseHelper(this);
-        myDB.getReadableDatabase();
-
         // check if connected to internet
         IsWifiConnectedHelper con = new IsWifiConnectedHelper(this);
         Boolean connected = con.getConnected();
@@ -215,6 +215,8 @@ public class CoffeeShopsActivity extends AppCompatActivity {
             Intent intent = new Intent(CoffeeShopsActivity.this, LoginActivity.class);
             CoffeeShopsActivity.this.startActivity(intent);
         } else {
+            DatabaseHelper myDB = new DatabaseHelper(this);
+            myDB.getReadableDatabase();
             // Read from Local SQLite db to populate shop list
             if (0 < myDB.getAllShops().size()) {
                 for (int i = 1; i <= myDB.getAllShops().size(); i++) {
@@ -231,6 +233,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                     shopCard.setShopID(shop.getShopID());
                     shopList.add(shopCard);
                 }
+                myDB.close();
                 adapter.notifyDataSetChanged();
                 }
 
@@ -252,6 +255,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
             if (visit.getShopID() == shopID) visitCount++;
         }
         int pointCount = visitCount % MAX_VISITS_FOR_FREE_COFFEE + 1;
+        myDB.close();
         return pointCount;
     }
 

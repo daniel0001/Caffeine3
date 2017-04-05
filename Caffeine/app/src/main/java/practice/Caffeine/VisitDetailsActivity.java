@@ -1,7 +1,9 @@
 package practice.Caffeine;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -33,7 +35,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONObject;
 
+import java.net.NetworkInterface;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -64,12 +68,46 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
     private int shopID;
     private Visit visit;
     private Integer LOCATION_REFRESH_TIME = 5000;
-    private Integer LOCATION_REFRESH_DISTANCE = 0;
+    private Integer LOCATION_REFRESH_DISTANCE = 5;
     private LocationManager locationManager;
     private LocationListener locationListener;
     private DatabaseHelper myDB;
     private boolean gpsEnabled;
     private boolean wifiConnected;
+    private Shop shop;
+    private List<Visit> visitList;
+    private String wifiSSID;
+    private String wifiMAC;
+    private Double GPS_ERROR = 0.000008; // Error check for GPS location
+    private int ACCURACY = 15;
+    private Double userLat;
+    private Double userLng;
+
+    public static String getMacAddr() {
+        try {
+            List<NetworkInterface> all = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface nif : all) {
+                if (!nif.getName().equalsIgnoreCase("wlan0")) continue;
+
+                byte[] macBytes = nif.getHardwareAddress();
+                if (macBytes == null) {
+                    return "";
+                }
+
+                StringBuilder res1 = new StringBuilder();
+                for (byte b : macBytes) {
+                    res1.append(String.format("%02X:", b));
+                }
+
+                if (res1.length() > 0) {
+                    res1.deleteCharAt(res1.length() - 1);
+                }
+                return res1.toString();
+            }
+        } catch (Exception ex) {
+        }
+        return "02:00:00:00:00:00";
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,6 +142,12 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
         tvShopPhone.setText(shopPhone);
         tvShopAddress.setText(shopAddress);
 
+        myDB = new DatabaseHelper(VisitDetailsActivity.this);
+        myDB.getReadableDatabase();
+        visitList = myDB.getAllVisits();
+        shop = myDB.getShop(shopID);
+        myDB.close();
+
 
         // Button Add Point - check if in shop using GPS, check if already at 9 points,
         // check if point already collected in same calendar day (only 1 point per day allowed)
@@ -116,11 +160,20 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
             bAddPoint.setBackgroundColor(R.color.dark_grey);
         }
 
+
         locationChecker();
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
+                if (location.getAccuracy() > ACCURACY) {
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener);
+                    return;
+                }
+
+
+                //Then remove the updates once done
+                locationManager.removeUpdates(locationListener);
 
             }
 
@@ -140,29 +193,34 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
                 startActivity(intent);
             }
         };
+        Log.d("location : ", locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) + "");
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener);
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        location.setAccuracy(Criteria.ACCURACY_FINE);
+        userLat = location.getLatitude();
+        userLng = location.getLongitude();
 
         bAddPoint.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Boolean locCheck = false; // This checks if the GPS matches (if it does then add point and move back to CoffeeShopActivity)
-                Boolean dateCheck = true; // Checks if current date is same as lastvisit date (true if same)
+                Boolean sameDateCheck = true; // Checks if current date is same as lastvisit date given the shopID(true if same)
                 Calendar calendar = Calendar.getInstance();
-                String currentDate = String.valueOf(calendar.get(Calendar.YEAR)) + "-" + String.valueOf(calendar.get(Calendar.MONTH) + 1) + "-" + String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+                String month = String.valueOf(calendar.get(Calendar.MONTH) + 1);
+                if (month.length() < 2) month = "0" + month;
+                String day = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+                if (day.length() < 2) day = "0" + day;
+                String currentDate = String.valueOf(calendar.get(Calendar.YEAR)) + "-" + month + "-" + day;
                 Log.d("CurrentDate: ", String.valueOf(currentDate));
 
-                myDB = new DatabaseHelper(VisitDetailsActivity.this);
-                myDB.getReadableDatabase();
-                List<Visit> visitList = myDB.getAllVisits();
-
-
                 int x = visitList.size();
-                for (int i = 0; i < visitList.size(); i++) {
-                    visit = visitList.get(x - i - 1);
+                for (int i = 1; i < visitList.size(); i++) {
+                    visit = visitList.get(x - i);
                     String visitDate = visit.getDate();
                     visitDate = visitDate.substring(0, visitDate.indexOf(" "));
 
-                    if (visit.getShopID() == shopID && visitDate != currentDate) {
-                        dateCheck = false;
+                    if (visit.getShopID() == shopID && !visitDate.equals(currentDate)) {
+                        sameDateCheck = false;
                         break;
                     }
                 }
@@ -174,20 +232,49 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
 
 
                 //Get latitude and longitude of user to find out where they are when registering
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener);
-                Log.d("location : ", locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) + "");
-                Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                Double userLat = location.getLatitude();
-                Double userLng = location.getLongitude();
-                userLat = (double) Math.round(userLat * 10000);      // this cuts down the GPS coordinates to match with the DB ie. lat 53.3811 lng -6.5923
-                userLng = (double) Math.round(userLng * 10000);
-                lat = (double) Math.round(lat * 10000);
-                lng = (double) Math.round(lng * 10000);
+                // TODO: issue with GPS accuracy so compromise to 3 decimal places
+                // There is a secondary issue with not all shops having wifi and logging in being restrictive
+                // Alternative solution would be to use a QR code in the store for user to verify with
+                // However this limits growth to those stores that have QR codes creating admin overheads
 
 
-                if (userLat.equals(lat) && userLng.equals(lng)) locCheck = true;
+                // remove minus signs from lat and lng
+                Double latX = lat;
+                Double lngX = lng;
+                Double userLatX = userLat;
+                Double userLngX = userLng;
+                if (latX < 0) latX *= -1;
+                if (lngX < 0) lngX *= -1;
+                if (userLatX < 0) userLatX *= -1;
+                if (userLngX < 0) userLngX *= -1;
 
-                if (locCheck && !dateCheck) {
+                // check location to within a percentage of Error
+                Double latMax = latX + (latX * GPS_ERROR);
+                Double latMin = latX - (latX * GPS_ERROR);
+                Double lngMax = lngX + (lngX * GPS_ERROR);
+                Double lngMin = lngX - (lngX * GPS_ERROR);
+                if ((userLatX > latMin && userLatX < latMax) && (userLngX > lngMin && userLngX < lngMax))
+                    locCheck = true;
+
+                if (sameDateCheck) {
+                    String[] funnyNegStrings = new String[]{ // Strings to tell the user that they don't have enough points
+                            getString(R.string.funny_neg_visit_1),
+                            getString(R.string.funny_neg_visit_2),
+                            getString(R.string.funny_neg_visit_3),
+                            getString(R.string.funny_neg_visit_4),
+                            getString(R.string.funny_neg_visit_5)
+                    };
+                    Random random = new Random();
+                    int max = 4;
+                    int y = random.nextInt(max);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(VisitDetailsActivity.this);
+                    builder.setMessage(funnyNegStrings[y])
+                            .setNegativeButton(R.string.ok, null)
+                            .create()
+                            .show();
+                }
+
+                if (locCheck && !sameDateCheck) {
 
                     Response.Listener<String> listener = new Response.Listener<String>() {
                         @Override
@@ -215,26 +302,16 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
                     queue.add(addVisitRequest);
 
                 } else {
-                    String[] funnyNegStrings = new String[]{ // Strings to tell the user that they don't have enough points
-                            getString(R.string.funny_neg_visit_1),
-                            getString(R.string.funny_neg_visit_2),
-                            getString(R.string.funny_neg_visit_3),
-                            getString(R.string.funny_neg_visit_4),
-                            getString(R.string.funny_neg_visit_5)
-                    };
-                    Random random = new Random();
-                    int max = 4;
-                    int y = random.nextInt(max);
                     AlertDialog.Builder builder = new AlertDialog.Builder(VisitDetailsActivity.this);
-                    builder.setMessage(funnyNegStrings[y])
-                            .setNegativeButton("Ok", null)
+                    DialogInterface.OnClickListener wifiListener;
+                    builder.setMessage("**** Oh no, something went wrong **** \n\nError: You must be in the shop to collect a loyalty point.\n\nLocation data from your phone\'s GPS doesn\'t match with this shop \n\nIf this is an error try switching your Location off and on to refresh. \n\n" + shopName + " GPS Data:\n\nLat: " + lat + "\nLng: " + lng + "\n\nYour Location: \n\nLat: " + userLat + "\nLng: " + userLng)
+                            .setNegativeButton(R.string.cancel, null)
                             .create()
                             .show();
-
-
                 }
-            }
+                }
         });
+
 
         bClaimCoffee = (Button) findViewById(R.id.bRedeemPoints);
         if (pointCount < MAX_NUMBER_POINTS) {
