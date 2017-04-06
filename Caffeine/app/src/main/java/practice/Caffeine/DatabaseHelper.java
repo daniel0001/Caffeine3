@@ -17,7 +17,7 @@ import java.util.List;
 public final class DatabaseHelper extends SQLiteOpenHelper{
 
     // If you change the database schema, you must increment the database version.
-    public static final int DATABASE_VERSION = 11;
+    public static final int DATABASE_VERSION = 16;
     public static final String DATABASE_NAME = "myDB.db";
     public static final String TABLE_NAME_USER = "user";
     public static final String TABLE_NAME_SHOPS = "shops";
@@ -74,9 +74,9 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
             "CREATE TABLE " + TABLE_NAME_VISITS + " (" +
                     _ID + " INTEGER PRIMARY KEY NOT NULL," +
                     COLUMN_NAME_VISITID + " INTEGER," +
-                    COLUMN_NAME_SHOPID + " INTEGER," +
-                    COLUMN_NAME_VISITDATE + " TEXT)";
-    private static final String[] VISITS_COLUMNS = {_ID, COLUMN_NAME_VISITID, COLUMN_NAME_SHOPID, COLUMN_NAME_VISITDATE};
+                    COLUMN_NAME_VISITDATE + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP," +
+                    COLUMN_NAME_SHOPID + " INTEGER)";
+    private static final String[] VISITS_COLUMNS = {_ID, COLUMN_NAME_VISITID, COLUMN_NAME_VISITDATE, COLUMN_NAME_SHOPID};
 
     private static final String SQL_DELETE_USERTABLE = "DROP TABLE IF EXISTS " + TABLE_NAME_USER;
     private static final String SQL_DELETE_SHOPSTABLE = "DROP TABLE IF EXISTS " + TABLE_NAME_SHOPS;
@@ -128,19 +128,19 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
             }
 
     public boolean addVisit(Visit visit) {
-        Log.d("addVisit", visit.toString());
+        // Log.d("addVisit", visit.toString());
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME_VISITID, visit.getVisitID());
-        values.put(COLUMN_NAME_SHOPID, visit.getShopID());
         values.put(COLUMN_NAME_VISITDATE, visit.getDate());
+        values.put(COLUMN_NAME_SHOPID, visit.getShopID());
         long result = db.insert(TABLE_NAME_VISITS, null, values);
         return result != -1;
 
     }
 
     public boolean addShop(Shop shop) {
-        Log.d("addShop", shop.toString());
+        //  Log.d("addShop", shop.toString());
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME_SHOPID, shop.getShopID());
@@ -216,7 +216,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         // 3. if we got results get the first one
         if (cursor != null && cursor.moveToFirst()) {
 
-            Log.d("cursor: ", String.valueOf(cursor.getInt(1)));
+            //  Log.d("cursor: ", String.valueOf(cursor.getInt(1)));
             // 4. build shop object
             Shop shop = new Shop();
             shop.setId(cursor.getInt(0));
@@ -231,7 +231,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
             shop.setWifiSSID(cursor.getString(9));
             shop.setPhoneNum(cursor.getString(10));
             //log
-            Log.d("getShop(" + id + ")", shop.toString());
+            // Log.d("getShop(" + id + ")", shop.toString());
             cursor.close();
             // 5. return shop
             return shop;
@@ -257,12 +257,12 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
             cursor.moveToFirst();
         // 4. build visit object
         Visit visit = new Visit();
-        visit.setID(Integer.parseInt(cursor.getString(0)));
-        visit.setVisitID(Integer.parseInt(cursor.getString(1)));
-        visit.setShopID(Integer.parseInt(cursor.getString(2)));
-        visit.setDate(cursor.getString(3));
+        visit.setID(cursor.getInt(0));
+        visit.setVisitID(cursor.getInt(1));
+        visit.setDate(cursor.getString(2));
+        visit.setShopID(cursor.getInt(3));
         //log
-        Log.d("getVisit(" + id + ")", visit.toString());
+        //  Log.d("getVisit(" + id + ")", visit.toString());
         cursor.close();
         // 5. return visit
         return visit;
@@ -302,7 +302,7 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
             } while (cursor.moveToNext());
         }
         cursor.close();
-        Log.d("getAllShops DBHelper", shops.toString());
+        //  Log.d("getAllShops DBHelper", shops.toString());
 
         // return shops
         return shops;
@@ -320,16 +320,15 @@ public final class DatabaseHelper extends SQLiteOpenHelper{
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 visit = new Visit();
-                visit.setID(Integer.parseInt(cursor.getString(0)));
-                visit.setVisitID(Integer.parseInt(cursor.getString(1)));
-                visit.setShopID(Integer.parseInt(cursor.getString(2)));
-                visit.setDate(cursor.getString(3));
-
+                visit.setID(cursor.getInt(0));
+                visit.setVisitID(cursor.getInt(1));
+                visit.setDate(cursor.getString(2));
+                visit.setShopID(cursor.getInt(3));
                 // Add shop to shops
                 visits.add(visit);
             } while (cursor.moveToNext());
         }
-        Log.d("getAllVisits()", visits.toString());
+
         cursor.close();
         // return visits
         return visits;

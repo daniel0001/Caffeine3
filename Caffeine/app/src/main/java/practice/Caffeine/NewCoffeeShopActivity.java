@@ -36,6 +36,7 @@ import java.net.NetworkInterface;
 import java.util.Collections;
 import java.util.List;
 
+import static com.google.android.gms.location.places.Place.TYPE_BAR;
 import static com.google.android.gms.location.places.Place.TYPE_CAFE;
 import static com.google.android.gms.location.places.Place.TYPE_CONVENIENCE_STORE;
 import static com.google.android.gms.location.places.Place.TYPE_FOOD;
@@ -181,7 +182,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                             return;
                         }
                         // check if the selected Place is a restaurant or coffee shop using getPlaceTypes List shown here(https://developers.google.com/android/reference/com/google/android/gms/location/places/Place)
-                        if (!(placeTypes.contains(TYPE_CAFE) || placeTypes.contains(TYPE_CONVENIENCE_STORE) || placeTypes.contains(TYPE_FOOD) || placeTypes.contains(TYPE_GAS_STATION) || placeTypes.contains(TYPE_GROCERY_OR_SUPERMARKET) || placeTypes.contains(TYPE_GYM) || placeTypes.contains(TYPE_LIQUOR_STORE) || placeTypes.contains(TYPE_RESTAURANT))) {
+                        if (!(placeTypes.contains(TYPE_BAR) || placeTypes.contains(TYPE_CAFE) || placeTypes.contains(TYPE_CONVENIENCE_STORE) || placeTypes.contains(TYPE_FOOD) || placeTypes.contains(TYPE_GAS_STATION) || placeTypes.contains(TYPE_GROCERY_OR_SUPERMARKET) || placeTypes.contains(TYPE_GYM) || placeTypes.contains(TYPE_LIQUOR_STORE) || placeTypes.contains(TYPE_RESTAURANT))) {
                             Toast.makeText(NewCoffeeShopActivity.this, "Oh Snap! This shop doesn't appear to be on our list as a valid Coffee Shop, Store or Restaurant. Please 'Find Shop' again", Toast.LENGTH_LONG).show();
                             // if not completed return to start
                             return;

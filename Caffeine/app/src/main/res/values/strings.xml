@@ -52,9 +52,14 @@
     <string name="funny_neg_5">Points mean prizes!</string>
 
 
-    <string name="barista_instructions">Congratulations! \n\n You have collected 9 out of 9 Love Coffee Loyalty points. \n\n Please show this to a staff member before claiming your free coffee. They must click the Barista Button to reset your points.</string>
+    <string name="barista_instructions">You have collected 9 out of 9 Love Coffee Loyalty points.\nPlease show this to a staff member before claiming your free coffee.</string>
+    <string name="barist_must_click">Click the Barista Button to reset points</string>
     <string name="barista_button">Barista Reset Button \n Coffee Claimed at Counter</string>
-    <string name="click_above">Click on cups above to view dates of points collected in:</string>
-    <string name="barista_button_warning">***Redeem Coffee!*** \n \nPlease select \'Ok\' if you wish to proceed with redeeming the free coffee OR \'Cancel\' if you hit this button in error.</string>
+    <string name="click_above">Click on the cups below to view the dates of points collected</string>
+    <string name="barista_button_warning">***Redeem Coffee!*** \n\nPlease select \'Ok\' if you wish to proceed with redeeming the free coffee OR \'Cancel\' if you hit this button in error.</string>
+    <string name="congrats_free_coffee">Congratulations! \nYou have earned a free coffee by being a loyal customer of:</string>
+
+    <string name="no_visits">No visits to show in your list</string>
+
 </resources>
 

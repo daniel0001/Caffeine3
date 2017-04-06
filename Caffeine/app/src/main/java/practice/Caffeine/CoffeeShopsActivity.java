@@ -32,7 +32,7 @@ import java.util.ArrayList;
 
 public class CoffeeShopsActivity extends AppCompatActivity {
 
-    private static final int MAX_VISITS_FOR_FREE_COFFEE = 9; // The Max + 1 Visit is when the user redeems the free coffee
+    private static final int MAX_VISITS_FOR_FREE_COFFEE = 10; // The Max + 1 Visit is when the user redeems the free coffee
     private RecyclerView recyclerView;
     private ShopAdapter adapter;
     private ArrayList<ShopCard> shopList;
@@ -46,6 +46,10 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_coffee_shops);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+
+        // TODO: Performance is slower if rebuilding from remote via JSON so check if coming from Login before rebuild
+        // This will Also require VisitDetailsActivity and RedeemCoffeeActivity to update local DB visits table when scoring a point
 
         //Clean DB for rebuild
         DatabaseHelper myDB = new DatabaseHelper(this);
@@ -84,6 +88,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
 
                     DatabaseHelper myDB = new DatabaseHelper(CoffeeShopsActivity.this);
                     myDB.getWritableDatabase();
+                    int y = 1;
 
                     if (success) {
                         for (int i = 1; i < responseSize; i++) {
@@ -105,10 +110,12 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                             if (jsonResponse.getJSONObject(i).getString("type").equals("visit")) {
                                 Visit visit = new Visit();
                                 JSONObject jsonVisit = jsonResponse.getJSONObject(i);
+                                visit.setID(y);
                                 visit.setVisitID(jsonVisit.getInt("visitID"));
                                 visit.setShopID(jsonVisit.getInt("shopID"));
                                 visit.setDate(jsonVisit.getString("date"));
                                 myDB.addVisit(visit);
+                                y++;
                             }
                         }
                         Log.d("All Shops inserted: ", myDB.getAllShops().toString());
@@ -226,8 +233,8 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                     shopCard.setName(shop.getName());
                     shopCard.setShopPhone(shop.getPhoneNum());
                     shopCard.setShopAddress(shop.getAddress());
-                    shopCard.setNumPoints(pointCount(shop.getShopID()));
-                    shopCard.setShopImage(shopImages[pointCount(shop.getShopID()) + 1]);
+                    shopCard.setNumPoints(pointCount(shop.getShopID()) - 1);
+                    shopCard.setShopImage(shopImages[pointCount(shop.getShopID())]);
                     shopCard.setLat(Double.valueOf(shop.getLat()));
                     shopCard.setLng(Double.valueOf(shop.getLng()));
                     shopCard.setShopID(shop.getShopID());

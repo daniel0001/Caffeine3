@@ -1,15 +1,11 @@
 package practice.Caffeine;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Criteria;
-import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
@@ -36,6 +32,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import org.json.JSONObject;
 
 import java.net.NetworkInterface;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -82,6 +79,7 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
     private int ACCURACY = 15;
     private Double userLat;
     private Double userLng;
+    private String currentDate;
 
     public static String getMacAddr() {
         try {
@@ -161,7 +159,7 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
         }
 
 
-        locationChecker();
+  /*      locationChecker();
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
         locationListener = new LocationListener() {
             @Override
@@ -199,19 +197,17 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
         location.setAccuracy(Criteria.ACCURACY_FINE);
         userLat = location.getLatitude();
         userLng = location.getLongitude();
-
+*/
         bAddPoint.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Boolean locCheck = false; // This checks if the GPS matches (if it does then add point and move back to CoffeeShopActivity)
                 Boolean sameDateCheck = true; // Checks if current date is same as lastvisit date given the shopID(true if same)
                 Calendar calendar = Calendar.getInstance();
-                String month = String.valueOf(calendar.get(Calendar.MONTH) + 1);
-                if (month.length() < 2) month = "0" + month;
-                String day = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
-                if (day.length() < 2) day = "0" + day;
-                String currentDate = String.valueOf(calendar.get(Calendar.YEAR)) + "-" + month + "-" + day;
-                Log.d("CurrentDate: ", String.valueOf(currentDate));
+                calendar.add(Calendar.DATE, 1);
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                currentDate = sdf.format(calendar.getTime());
+                Log.d("CurrentDate: ", currentDate);
 
                 int x = visitList.size();
                 for (int i = 1; i < visitList.size(); i++) {
@@ -239,7 +235,7 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
 
 
                 // remove minus signs from lat and lng
-                Double latX = lat;
+ /*               Double latX = lat;
                 Double lngX = lng;
                 Double userLatX = userLat;
                 Double userLngX = userLng;
@@ -274,18 +270,27 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
                             .show();
                 }
 
-                if (locCheck && !sameDateCheck) {
+                if (!locCheck && sameDateCheck) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(VisitDetailsActivity.this);
+                    DialogInterface.OnClickListener wifiListener;
+                    builder.setMessage("**** Oh no, something went wrong **** \n\nError: You must be in the shop to collect a loyalty point.\n\nLocation data from your phone\'s GPS doesn\'t match with this shop \n\nIf this is an error try switching your Location off and on to refresh. \n\n" + shopName + " GPS Data:\n\nLat: " + lat + "\nLng: " + lng + "\n\nYour Location: \n\nLat: " + userLat + "\nLng: " + userLng)
+                            .setNegativeButton(R.string.cancel, null)
+                            .create()
+                            .show();
+                }
+               */
 
-                    Response.Listener<String> listener = new Response.Listener<String>() {
-                        @Override
-                        public void onResponse(String response) {
-
+                Response.Listener<String> listener = new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        if (pointCount < MAX_NUMBER_POINTS) {
                             try {
                                 Log.d("fixme", response);
                                 JSONObject jsonResponse = new JSONObject(response);
                                 boolean success = jsonResponse.getBoolean("success");
 
                                 if (success) {
+
                                     Intent intent = new Intent(VisitDetailsActivity.this, CoffeeShopsActivity.class);
                                     intent.putExtra("name", userName);
                                     intent.putExtra("userID", userID);
@@ -296,21 +301,16 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
                             }
 
                         }
-                    };
+                    }
+                };
                     AddVisitRequest addVisitRequest = new AddVisitRequest(listener, String.valueOf(shopID), String.valueOf(userID));
                     RequestQueue queue = Volley.newRequestQueue(VisitDetailsActivity.this);
                     queue.add(addVisitRequest);
+                }
 
-                } else {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(VisitDetailsActivity.this);
-                    DialogInterface.OnClickListener wifiListener;
-                    builder.setMessage("**** Oh no, something went wrong **** \n\nError: You must be in the shop to collect a loyalty point.\n\nLocation data from your phone\'s GPS doesn\'t match with this shop \n\nIf this is an error try switching your Location off and on to refresh. \n\n" + shopName + " GPS Data:\n\nLat: " + lat + "\nLng: " + lng + "\n\nYour Location: \n\nLat: " + userLat + "\nLng: " + userLng)
-                            .setNegativeButton(R.string.cancel, null)
-                            .create()
-                            .show();
-                }
-                }
         });
+
+
 
 
         bClaimCoffee = (Button) findViewById(R.id.bRedeemPoints);
@@ -322,7 +322,6 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
             bClaimCoffee.setTextColor(R.color.white);
             bClaimCoffee.setBackgroundColor(R.color.red);
         }
-
 
         bClaimCoffee.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -337,6 +336,7 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
                     intent.putExtra("lat", lat);
                     intent.putExtra("lng", lng);
                     intent.putExtra("pointCount", pointCount);
+                    intent.putExtra("shopID", shopID);
                     VisitDetailsActivity.this.startActivity(intent);
 
                 } else {
@@ -372,7 +372,7 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
                 R.drawable.cup_grey_grid_heart_8_wide,
                 R.drawable.cup_grey_grid_heart_9_wide,
         };
-        Glide.with(this).load(shopImages[pointCount]).into(ivVisitCount);
+        Glide.with(VisitDetailsActivity.this).load(shopImages[pointCount]).into(ivVisitCount);
 
         ivVisitCount.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -386,6 +386,7 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
                 intent.putExtra("lat", lat);
                 intent.putExtra("lng", lng);
                 intent.putExtra("pointCount", pointCount);
+                intent.putExtra("shopID", shopID);
                 VisitDetailsActivity.this.startActivity(intent);
             }
         });
@@ -397,7 +398,7 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
     public void onMapReady(GoogleMap map) {
 
         // TODO: change marker to be custom (ideas might be to use the cup_yellow_heart but resource needs work
-        MapsInitializer.initialize(this);
+        MapsInitializer.initialize(VisitDetailsActivity.this);
         map.addMarker(new MarkerOptions().position(shopLatLng).title(shopName));
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(shopLatLng) // Center Set
@@ -414,7 +415,7 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
     public void locationChecker() {
         // check for permissions to use GPS location
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(VisitDetailsActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{
                         android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION,
                         android.Manifest.permission.INTERNET

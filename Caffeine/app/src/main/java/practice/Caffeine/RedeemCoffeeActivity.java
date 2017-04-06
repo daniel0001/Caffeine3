@@ -5,10 +5,17 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONObject;
 
 public class RedeemCoffeeActivity extends AppCompatActivity {
 
@@ -23,6 +30,7 @@ public class RedeemCoffeeActivity extends AppCompatActivity {
     private Double lng;
     private String shopName;
     private String shopAddress;
+    private int shopID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +40,8 @@ public class RedeemCoffeeActivity extends AppCompatActivity {
         Intent intent = getIntent();
         tvShopName = (TextView) findViewById(R.id.tvShopName);
         tvShopAddress = (TextView) findViewById(R.id.tvShopAddress);
+        ivPointsDetail = (ImageView) findViewById(R.id.ivNineCupsWide);
+        bBaristaReset = (Button) findViewById(R.id.bBaristaButton);
         userID = intent.getIntExtra("userID", 0);
         name = intent.getStringExtra("name");
         pointCount = intent.getIntExtra("pointCount", 0);
@@ -39,6 +49,7 @@ public class RedeemCoffeeActivity extends AppCompatActivity {
         lng = intent.getDoubleExtra("lng", 0);
         shopName = intent.getStringExtra("shopName");
         shopAddress = intent.getStringExtra("shopAddress");
+        shopID = intent.getIntExtra("shopID", 0);
 
         tvShopName.setText(shopName);
         tvShopAddress.setText(shopAddress);
@@ -51,6 +62,7 @@ public class RedeemCoffeeActivity extends AppCompatActivity {
                 intent.putExtra("name", name);
                 intent.putExtra("userID", userID);
                 intent.putExtra("pointCount", pointCount);
+                intent.putExtra("shopID", shopID);
                 intent.putExtra("activitySource", "redeemActivity");
                 RedeemCoffeeActivity.this.startActivity(intent);
             }
@@ -66,32 +78,43 @@ public class RedeemCoffeeActivity extends AppCompatActivity {
                         .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                proceed[0] = true;
-                                return;
+
+                                Response.Listener<String> listener = new Response.Listener<String>() {
+                                    @Override
+                                    public void onResponse(String response) {
+                                        try {
+                                            Log.d("fixme", response);
+                                            JSONObject jsonResponse = new JSONObject(response);
+                                            boolean success = jsonResponse.getBoolean("success");
+                                            if (success) {
+                                                Intent intent = new Intent(RedeemCoffeeActivity.this, CoffeeShopsActivity.class);
+                                                intent.putExtra("name", name);
+                                                intent.putExtra("userID", userID);
+                                                RedeemCoffeeActivity.this.startActivity(intent);
+                                            }
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+
+                                };
+                                AddVisitRequest addVisitRequest = new AddVisitRequest(listener, String.valueOf(shopID), String.valueOf(userID));
+                                RequestQueue queue = Volley.newRequestQueue(RedeemCoffeeActivity.this);
+                                queue.add(addVisitRequest);
+
                             }
                         })
                         .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
-                                proceed[0] = false;
+
                                 return;
                             }
                         })
                         .create()
                         .show();
-
-                if (proceed[0]) {
-                    Intent intent = new Intent(RedeemCoffeeActivity.this, VisitDetailsActivity.class);
-                    intent.putExtra("name", name);
-                    intent.putExtra("userID", userID);
-                    intent.putExtra("pointCount", 0); // Set pointCount to 0 now that the coffee has been redeemed
-                    intent.putExtra("lat", lat);
-                    intent.putExtra("lng", lng);
-                    RedeemCoffeeActivity.this.startActivity(intent);
-                }
-
             }
         });
-
     }
 }
+
