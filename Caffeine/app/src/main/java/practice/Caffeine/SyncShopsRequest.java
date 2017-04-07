@@ -16,10 +16,11 @@ public class SyncShopsRequest extends StringRequest {
 
     private Map<String, String> params;
 
-    public SyncShopsRequest(Response.Listener<String> listener, Integer userID) {
+    public SyncShopsRequest(Response.Listener<String> listener, Integer userID, Integer maxVisits) {
         super(Method.POST, REGISTER_REQUEST_URL, listener, null);
         params = new HashMap<>();
         params.put("userID", userID.toString());
+        params.put("maxVisits", maxVisits.toString());
     }
 
     public Map<String, String> getParams() {

@@ -54,8 +54,10 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         //Clean DB for rebuild
         DatabaseHelper myDB = new DatabaseHelper(this);
         myDB.getWritableDatabase();
+        myDB.getReadableDatabase();
         myDB.deleteAllShops();
         myDB.deleteAllVisits();
+        myDB.close();
 
 
         initCollapsingToolbar();
@@ -120,17 +122,17 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                         }
                         Log.d("All Shops inserted: ", myDB.getAllShops().toString());
                         Log.d("All Visits inserted: ", myDB.getAllVisits().toString());
-
                     }
                     myDB.close();
                     prepareShops();
+
 
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         };
-        SyncShopsRequest syncRequest = new SyncShopsRequest(syncResponseListener, userID);
+        SyncShopsRequest syncRequest = new SyncShopsRequest(syncResponseListener, userID, MAX_VISITS_FOR_FREE_COFFEE);
         RequestQueue queue = Volley.newRequestQueue(CoffeeShopsActivity.this);
         queue.add(syncRequest);
 
@@ -257,7 +259,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         DatabaseHelper myDB = new DatabaseHelper(this);
         myDB.getReadableDatabase();
         int visitCount = 0;
-        for (int i = 1; i < myDB.getAllVisits().size(); i++) {
+        for (int i = 1; i <= myDB.getAllVisits().size(); i++) {
             Visit visit = myDB.getVisit(i);
             if (visit.getShopID() == shopID) visitCount++;
         }
