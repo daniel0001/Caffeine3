@@ -90,6 +90,7 @@ public class RedeemCoffeeActivity extends AppCompatActivity {
                                                 Intent intent = new Intent(RedeemCoffeeActivity.this, CoffeeShopsActivity.class);
                                                 intent.putExtra("name", name);
                                                 intent.putExtra("userID", userID);
+                                                finish();
                                                 RedeemCoffeeActivity.this.startActivity(intent);
                                             }
                                         } catch (Exception e) {

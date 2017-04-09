@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -198,9 +199,15 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
         userLat = location.getLatitude();
         userLng = location.getLongitude();
 */
+
         bAddPoint.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (pointCount == MAX_NUMBER_POINTS) {
+                    Toast toast = Toast.makeText(VisitDetailsActivity.this, "It's time to claim that coffee.", Toast.LENGTH_LONG);
+                    toast.show();
+                    return;
+                }
                 Boolean locCheck = false; // This checks if the GPS matches (if it does then add point and move back to CoffeeShopActivity)
                 Boolean sameDateCheck = true; // Checks if current date is same as lastvisit date given the shopID(true if same)
                 Calendar calendar = Calendar.getInstance();
@@ -283,44 +290,42 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
                 Response.Listener<String> listener = new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        if (pointCount < MAX_NUMBER_POINTS) {
-                            try {
-                                Log.d("fixme", response);
-                                JSONObject jsonResponse = new JSONObject(response);
-                                boolean success = jsonResponse.getBoolean("success");
 
-                                if (success) {
+                        try {
+                            Log.d("fixme", response);
+                            JSONObject jsonResponse = new JSONObject(response);
+                            boolean success = jsonResponse.getBoolean("success");
 
-                                    Intent intent = new Intent(VisitDetailsActivity.this, CoffeeShopsActivity.class);
-                                    intent.putExtra("name", userName);
-                                    intent.putExtra("userID", userID);
-                                    VisitDetailsActivity.this.startActivity(intent);
-                                }
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                            if (success) {
+
+                                Intent intent = new Intent(VisitDetailsActivity.this, CoffeeShopsActivity.class);
+                                intent.putExtra("name", userName);
+                                intent.putExtra("userID", userID);
+                                finish();
+                                VisitDetailsActivity.this.startActivity(intent);
                             }
-
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
+
                     }
                 };
-                    AddVisitRequest addVisitRequest = new AddVisitRequest(listener, String.valueOf(shopID), String.valueOf(userID));
-                    RequestQueue queue = Volley.newRequestQueue(VisitDetailsActivity.this);
-                    queue.add(addVisitRequest);
-                }
+                AddVisitRequest addVisitRequest = new AddVisitRequest(listener, String.valueOf(shopID), String.valueOf(userID));
+                RequestQueue queue = Volley.newRequestQueue(VisitDetailsActivity.this);
+                queue.add(addVisitRequest);
+            }
 
         });
 
 
-
-
         bClaimCoffee = (Button) findViewById(R.id.bRedeemPoints);
-        if (pointCount < MAX_NUMBER_POINTS) {
+        if (pointCount > MAX_NUMBER_POINTS) {
             bClaimCoffee.setTextColor(R.color.light_grey);
             bClaimCoffee.setBackgroundColor(R.color.dark_grey);
         }
         if (pointCount == MAX_NUMBER_POINTS) {
             bClaimCoffee.setTextColor(R.color.white);
-            bClaimCoffee.setBackgroundColor(R.color.red);
+            bClaimCoffee.setTextColor(R.color.red);
         }
 
         bClaimCoffee.setOnClickListener(new View.OnClickListener() {
@@ -337,6 +342,7 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
                     intent.putExtra("lng", lng);
                     intent.putExtra("pointCount", pointCount);
                     intent.putExtra("shopID", shopID);
+                    finish();
                     VisitDetailsActivity.this.startActivity(intent);
 
                 } else {
@@ -390,8 +396,6 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
                 VisitDetailsActivity.this.startActivity(intent);
             }
         });
-
-
     }
 
     @Override
@@ -408,8 +412,6 @@ public class VisitDetailsActivity extends AppCompatActivity implements OnMapRead
                 .build();                   // Creates a CameraPosition from the builder
         map.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         map.getUiSettings().setMapToolbarEnabled(true);
-
-
     }
 
     public void locationChecker() {

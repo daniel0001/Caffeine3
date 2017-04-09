@@ -23,10 +23,15 @@ import java.io.File;
 
 
 public class LoginActivity extends AppCompatActivity {
-    DatabaseHelper myDB;
+    private DatabaseHelper myDB;
     private int userID;
     private boolean gpsEnabled;
     private boolean wifiConnected;
+    private String name;
+    private String phone;
+    private String lat;
+    private String lng;
+    private String email;
     private String username;
     private String password;
     private Button bLogin;
@@ -34,6 +39,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText etUsername;
     private EditText etPassword;
     private Toast toast;
+
 
 
     /**
@@ -52,6 +58,23 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         gpsEnabled = false;
         wifiConnected = false;
+
+        // Check that location is switched on and internet connected
+        CheckConnectedHelper checkConnectedHelper = new CheckConnectedHelper(LoginActivity.this);
+        if (!checkConnectedHelper.checkConnected(gpsEnabled, wifiConnected)) return;
+
+        // If myDB already Exists then wipe clean - Data should be fresh from remote DB
+        // to preserve accuracy and avoid syncing issues - An extension would be
+        // to enable offline use by syncing more often between SQLite db (local) and SQL db (remote)
+        // But this version is MVP to get to launch
+        myDB = new DatabaseHelper(LoginActivity.this);
+        Boolean myDBExists = doesDatabaseExist(LoginActivity.this, getDatabasePath(DatabaseHelper.databasePath).toString());
+        if (myDBExists) {
+            myDB.deleteAllShops();
+            myDB.deleteAllUsers();
+            myDB.deleteAllVisits();
+        }
+        myDB.close();
 
         etUsername = (EditText) findViewById(R.id.etUsername);
         etPassword = (EditText) findViewById(R.id.etPassword);
@@ -73,9 +96,6 @@ public class LoginActivity extends AppCompatActivity {
         bRegister.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
-                // Check that location is switched on and internet connected
-                CheckConnectedHelper checkConnectedHelper = new CheckConnectedHelper(LoginActivity.this);
-                if (!checkConnectedHelper.checkConnected(gpsEnabled, wifiConnected)) return;
 
                 // Start next intent Register Actvity
                 Intent registerIntent = new Intent(LoginActivity.this, RegisterActivity.class);
@@ -88,11 +108,6 @@ public class LoginActivity extends AppCompatActivity {
         bLogin.setOnClickListener(new View.OnClickListener() {
 
             public void onClick(View v) {
-                // Create the DB
-                myDB = new DatabaseHelper(LoginActivity.this);
-                // Check that location is switched on and internet connected
-                CheckConnectedHelper checkConnectedHelper = new CheckConnectedHelper(LoginActivity.this);
-                if (!checkConnectedHelper.checkConnected(gpsEnabled, wifiConnected)) return;
 
                 // Check if the editext fields are empty and return if so
                 username = etUsername.getText().toString();
@@ -113,23 +128,12 @@ public class LoginActivity extends AppCompatActivity {
 
                             if (success) {
                                 // Get data from JSONresponse from database
-                                String name = jsonResponse.getString("name");
+                                name = jsonResponse.getString("name");
                                 userID = jsonResponse.getInt("user_id");  // user_id is the name in the database but userID in app
-                                String phone = jsonResponse.getString("phone");
-                                String email = jsonResponse.getString("email");
-                                String lat = jsonResponse.getString("lat");
-                                String lng = jsonResponse.getString("lat");
-
-                                // If myDB already Exists then wipe clean - Data should be fresh from remote DB
-                                // to preserve accuracy and avoid syncing issues - An extension would be
-                                // to enable offline use by syncing more often between SQLite db (local) and SQL db (remote)
-                                // But this version is MVP to get to launch
-                                Boolean myDBExists = doesDatabaseExist(LoginActivity.this, getDatabasePath(DatabaseHelper.databasePath).toString());
-                                if (myDBExists) {
-                                    myDB.deleteAllShops();
-                                    myDB.deleteAllUsers();
-                                    myDB.deleteAllVisits();
-                                }
+                                phone = jsonResponse.getString("phone");
+                                email = jsonResponse.getString("email");
+                                lat = jsonResponse.getString("lat");
+                                lng = jsonResponse.getString("lng");
 
                                 // Enter user Data into SQLite DB 'myDB'
                                 User user = new User();
@@ -145,18 +149,19 @@ public class LoginActivity extends AppCompatActivity {
                                 myDB.addUser(user);
                                 Log.d("userID: ", myDB.getUser(1).getUserID() + "");
 
-                                //Open CoffeeShopsActivity
-                                Intent intent = new Intent(LoginActivity.this, CoffeeShopsActivity.class);
-                                intent.putExtra("userID", userID);
-                                intent.putExtra("name", name);
-                                LoginActivity.this.startActivity(intent);
-
                                 // Test to see if data inserted into table
                                 if (myDB.getUser(1).getUsername().equals(user.getUsername())) {
                                     Toast.makeText(LoginActivity.this, "Data Inserted", Toast.LENGTH_LONG).show();
                                 } else {
                                     Toast.makeText(LoginActivity.this, "Data not Inserted", Toast.LENGTH_LONG).show();
                                 }
+                                myDB.close();
+
+                                //Open CoffeeShopsActivity
+                                Intent intent = new Intent(LoginActivity.this, CoffeeShopsActivity.class);
+                                intent.putExtra("userID", userID);
+                                intent.putExtra("name", name);
+                                LoginActivity.this.startActivity(intent);
 
                             } else {
                                 AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);

@@ -5,14 +5,22 @@ package practice.Caffeine;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -28,6 +36,14 @@ import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -36,40 +52,49 @@ import java.net.NetworkInterface;
 import java.util.Collections;
 import java.util.List;
 
-import static com.google.android.gms.location.places.Place.TYPE_BAR;
 import static com.google.android.gms.location.places.Place.TYPE_CAFE;
 import static com.google.android.gms.location.places.Place.TYPE_CONVENIENCE_STORE;
 import static com.google.android.gms.location.places.Place.TYPE_FOOD;
 import static com.google.android.gms.location.places.Place.TYPE_GAS_STATION;
 import static com.google.android.gms.location.places.Place.TYPE_GROCERY_OR_SUPERMARKET;
 import static com.google.android.gms.location.places.Place.TYPE_GYM;
-import static com.google.android.gms.location.places.Place.TYPE_LIQUOR_STORE;
 import static com.google.android.gms.location.places.Place.TYPE_RESTAURANT;
 
 
-public class NewCoffeeShopActivity extends AppCompatActivity {
+public class NewCoffeeShopActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private String name;
     private Integer userID;
     private Button btnPlacePicker;
     private Button btnAddShop;
     private TextView tvShopName;
+    private String shopName;
     private TextView tvWifiSSID;
     private TextView tvShopAddress;
     private String wifiSSID;
     private String wifiMAC;
     private String shopWeb;
-    private String lat;
-    private String lng;
+    private String shopLat;
+    private String shopLng;
     private String phone;
     private String placeID;
-    private int shopID;
     private List<Integer> placeTypes;
     private boolean gpsEnabled;
     private boolean wifiConnected;
-
-
+    private Double userLat;
+    private Double userLng;
+    private LatLng userLatLng;
+    private LatLng shopLatLng;
+    private GoogleMap map;
+    private int shopID;
+    private Integer LOCATION_REFRESH_TIME = 5000;
+    private Integer LOCATION_REFRESH_DISTANCE = 5;
     private int PLACE_PICKER_REQUEST = 1;
+    private LocationManager locationManager;
+    private LocationListener locationListener;
+    private LatLng mapLatLng;
+    private String mapTitle;
+    private SupportMapFragment mapFragment;
 
     public static String getMacAddr() {
         try {
@@ -106,18 +131,58 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
         userID = intent.getIntExtra("userID", 0);
         btnPlacePicker = (Button) findViewById(R.id.bPickPlace);
         btnAddShop = (Button) findViewById(R.id.btnAddShop);
-        tvWifiSSID = (TextView) findViewById(R.id.tvWifiSSID);
         tvShopName = (TextView) findViewById(R.id.tvShopName);
         tvShopAddress = (TextView) findViewById(R.id.tvShopAddress);
         wifiSSID = null;
         wifiMAC = null;
 
+        // Get the userLatLng to add a fixed map of current location
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        locationListener = new LocationListener() {
+
+            @Override
+            public void onLocationChanged(Location location) {
+
+            }
+
+            @Override
+            public void onStatusChanged(String s, int i, Bundle bundle) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String s) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String s) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+        };
+
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener);
+        Log.d("location : ", locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) + "");
+        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        userLat = location.getLatitude();
+        userLng = location.getLongitude();
+        userLatLng = new LatLng(userLat, userLng);
+        mapLatLng = userLatLng;
+        mapTitle = "Use Find Shop Button Below";
+
+        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapView);
+        mapFragment.getMapAsync(this);
+
+        // Store shops to local shops table SQLite DB
+        final DatabaseHelper myDB = new DatabaseHelper(this);
+
+
         // Check if location services and network connected
+        // Originally required user to be logged in to wifi as used wifi to verify
+        // that user was in the shop - however not all shops have wifi so being logged in should be downgraded to optional
         gpsEnabled = false;
         wifiConnected = false;
-
-        // Store shops to shopDB SQLite
-        final DatabaseHelper myDB = new DatabaseHelper(this);
 
         ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo mWifi = connManager.getActiveNetworkInfo();
@@ -130,7 +195,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                     .show();
         }
 
-        // get the current logged in wifi SSID and display in tvWifiSSID
+        // get the current logged in wifi SSID for optional verification when redeeming a point / coffee
         WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         WifiInfo wifiInfo;
         wifiInfo = wifiManager.getConnectionInfo();
@@ -138,14 +203,9 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
             wifiSSID = wifiInfo.getSSID();
             wifiMAC = getMacAddr();
         }
-        tvWifiSSID.setText(wifiSSID);
 
         // when addCoffeeShop clicked, add the name of the Coffee Shop, wifi SSID, Time and Address to the table corresponding to the user_id
         // then start the Coffee Shop activity
-
-        // final String wifiName = wifiSSID.replaceAll("^\"|\"$", "");
-
-        // btnPlacePicker.onPickButtonClick();
 
         btnPlacePicker.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -161,6 +221,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                 } catch (GooglePlayServicesNotAvailableException e) {
                     // ...
                 }
+
             }
 
 
@@ -175,18 +236,19 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                         final String shopName = tvShopName.getText().toString().replace("'", "").replace(",", "");
                         final String address = tvShopAddress.getText().toString().replace("'", "");
 
-                        // Check if the editext fields are empty and return if so
+                        // Check if the text views are empty and return if so
                         if (shopName.length() == 0 || address.length() == 0) {
                             Toast.makeText(NewCoffeeShopActivity.this, "No shop name or shop address - please 'Find Shop' again", Toast.LENGTH_LONG).show();
                             // if not completed return to start
                             return;
                         }
                         // check if the selected Place is a restaurant or coffee shop using getPlaceTypes List shown here(https://developers.google.com/android/reference/com/google/android/gms/location/places/Place)
-                        if (!(placeTypes.contains(TYPE_BAR) || placeTypes.contains(TYPE_CAFE) || placeTypes.contains(TYPE_CONVENIENCE_STORE) || placeTypes.contains(TYPE_FOOD) || placeTypes.contains(TYPE_GAS_STATION) || placeTypes.contains(TYPE_GROCERY_OR_SUPERMARKET) || placeTypes.contains(TYPE_GYM) || placeTypes.contains(TYPE_LIQUOR_STORE) || placeTypes.contains(TYPE_RESTAURANT))) {
+                        if (!(placeTypes.contains(TYPE_CAFE) || placeTypes.contains(TYPE_CONVENIENCE_STORE) || placeTypes.contains(TYPE_FOOD) || placeTypes.contains(TYPE_GAS_STATION) || placeTypes.contains(TYPE_GROCERY_OR_SUPERMARKET) || placeTypes.contains(TYPE_GYM) || placeTypes.contains(TYPE_RESTAURANT))) {
                             Toast.makeText(NewCoffeeShopActivity.this, "Oh Snap! This shop doesn't appear to be on our list as a valid Coffee Shop, Store or Restaurant. Please 'Find Shop' again", Toast.LENGTH_LONG).show();
                             // if not completed return to start
                             return;
                         }
+
 
                         //Create a response listener
                         Response.Listener<String> responseListener = new Response.Listener<String>() {
@@ -224,12 +286,13 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                                             newShop.setName(shopName);
                                             newShop.setAddress(address);
                                             newShop.setWebsite(shopWeb);
-                                            newShop.setLat(lat);
-                                            newShop.setLng(lng);
+                                            newShop.setLat(shopLat);
+                                            newShop.setLng(shopLng);
                                             newShop.setPlaceID(placeID);
                                             newShop.setWifiMAC(wifiMAC);
                                             newShop.setWifiSSID(wifiSSID);
                                             myDB.addShop(newShop);
+                                            myDB.close();
                                         } catch (JSONException e) {
                                             e.printStackTrace();
                                             Toast.makeText(NewCoffeeShopActivity.this, "Error, please try again", Toast.LENGTH_LONG).show();
@@ -262,7 +325,7 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
                                 return cnt;
                             }
                         };
-                        NewCoffeeShopRequest newCoffeeShopRequest = new NewCoffeeShopRequest(responseListener, shopName, address, wifiSSID, wifiMAC, lat, lng, shopWeb, phone, userID, placeID);
+                        NewCoffeeShopRequest newCoffeeShopRequest = new NewCoffeeShopRequest(responseListener, shopName, address, wifiSSID, wifiMAC, shopLat, shopLng, shopWeb, phone, userID, placeID);
                         RequestQueue queue = Volley.newRequestQueue(NewCoffeeShopActivity.this);
                         queue.add(newCoffeeShopRequest);
                     }
@@ -274,18 +337,66 @@ public class NewCoffeeShopActivity extends AppCompatActivity {
         if (resultCode != RESULT_CANCELED && data != null && requestCode == PLACE_PICKER_REQUEST) {
             Place place = PlacePicker.getPlace(NewCoffeeShopActivity.this, data);
             Log.d("place: ", place.toString());
-            tvShopName.setText(place.getName().toString());
+            shopName = place.getName().toString();
+            tvShopName.setText(shopName);
             tvShopAddress.setText(place.getAddress().toString());
             if (place.getWebsiteUri() != null) {
                 shopWeb = place.getWebsiteUri().toString();
             } else {
                 shopWeb = "URL not available";
             }
-            lat = String.valueOf(place.getLatLng().latitude);
-            lng = String.valueOf(place.getLatLng().longitude);
+            shopLat = String.valueOf(place.getLatLng().latitude);
+            shopLng = String.valueOf(place.getLatLng().longitude);
+            shopLatLng = place.getLatLng();
             phone = place.getPhoneNumber().toString();
             placeTypes = place.getPlaceTypes();
             placeID = place.getId();
+            mapLatLng = shopLatLng;
+            mapTitle = shopName;
+            mapFragment.getMapAsync(this);
+
+
         }
     }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+
+        MapsInitializer.initialize(NewCoffeeShopActivity.this);
+        map.addMarker(new MarkerOptions().position(mapLatLng).title(mapTitle));
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(mapLatLng) // Center Set
+                .zoom(18.0f)                // Zoom
+                .bearing(0)                // Orientation of the camera to east
+                .tilt(30)                   // Tilt of the camera to 30 degrees
+                .build();                   // Creates a CameraPosition from the builder
+        map.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        map.getUiSettings().setMapToolbarEnabled(true);
+    }
+
+    public void locationChecker() {
+        // check for permissions to use GPS location
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ActivityCompat.checkSelfPermission(NewCoffeeShopActivity.this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{
+                        android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION,
+                        android.Manifest.permission.INTERNET
+                }, 10);
+            }
+            return;     // If no permission granted return
+        }
+    }
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        switch (requestCode) {
+            case 10:
+                locationChecker();
+                break;
+            default:
+                break;
+        }
+    }
+
+
 }

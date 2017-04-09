@@ -90,7 +90,7 @@ public class CoffeeShopsActivity extends AppCompatActivity {
 
                     DatabaseHelper myDB = new DatabaseHelper(CoffeeShopsActivity.this);
                     myDB.getWritableDatabase();
-                    int y = 1;
+                    int y = 1; // counter for setVisitID
 
                     if (success) {
                         for (int i = 1; i < responseSize; i++) {
@@ -125,8 +125,6 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                     }
                     myDB.close();
                     prepareShops();
-
-
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -137,8 +135,6 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         queue.add(syncRequest);
 
         // Load shops
-
-
         try {
             Glide.with(this).load(R.drawable.love_coffee).into((ImageView) findViewById(R.id.backdrop));
         } catch (Exception e) {
@@ -149,7 +145,6 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         // check if this the first ever addition of this shop
         // and reward user with congrats message
         final Boolean firstTimeShopAdded = intent.getBooleanExtra("firstEverShopAdded", false);
-
         if (firstTimeShopAdded) {
             AlertDialog.Builder builder = new AlertDialog.Builder(CoffeeShopsActivity.this);
             builder.setMessage("***NEW SHOP DISCOVERED!*** \n \nCongratulations! It looks like you are the first person to register this shop for Love Coffee. \n\nThat's great - but we will have to check if they accept 'Love Coffee' loyalty points so please check with a member of staff now. \n\nIf more info is required, please visit www.lovecoffee.ie for merchant details.")
@@ -158,7 +153,6 @@ public class CoffeeShopsActivity extends AppCompatActivity {
                     .show();
         }
     }
-
 
     /**
      * Initializing collapsing toolbar
@@ -197,7 +191,6 @@ public class CoffeeShopsActivity extends AppCompatActivity {
      */
     private void prepareShops() {
 
-
         int[] shopImages = new int[]{
                 R.drawable.addshop,
                 R.drawable.cup_grey_grid_0,
@@ -215,43 +208,32 @@ public class CoffeeShopsActivity extends AppCompatActivity {
         ShopCard a = new ShopCard(getString(R.string.add_new_coffee_shop), 0, shopImages[0], null, null, null, null, 0);
         shopList.add(a);
 
-        // check if connected to internet
-        IsWifiConnectedHelper con = new IsWifiConnectedHelper(this);
-        Boolean connected = con.getConnected();
-        if (!connected) {
-            con.notConnectedMessage();
-            // Set up new intent LoginActivity and send user back to Login again
-            Intent intent = new Intent(CoffeeShopsActivity.this, LoginActivity.class);
-            CoffeeShopsActivity.this.startActivity(intent);
-        } else {
-            DatabaseHelper myDB = new DatabaseHelper(this);
-            myDB.getReadableDatabase();
-            // Read from Local SQLite db to populate shop list
-            if (0 < myDB.getAllShops().size()) {
-                for (int i = 1; i <= myDB.getAllShops().size(); i++) {
-                    ShopCard shopCard = new ShopCard();
-                    Shop shop;
-                    shop = myDB.getShop(i);
-                    shopCard.setName(shop.getName());
-                    shopCard.setShopPhone(shop.getPhoneNum());
-                    shopCard.setShopAddress(shop.getAddress());
-                    shopCard.setNumPoints(pointCount(shop.getShopID()) - 1);
-                    shopCard.setShopImage(shopImages[pointCount(shop.getShopID())]);
-                    shopCard.setLat(Double.valueOf(shop.getLat()));
-                    shopCard.setLng(Double.valueOf(shop.getLng()));
-                    shopCard.setShopID(shop.getShopID());
-                    shopList.add(shopCard);
-                }
-                myDB.close();
-                adapter.notifyDataSetChanged();
-                }
-
+        DatabaseHelper myDB = new DatabaseHelper(this);
+        myDB.getReadableDatabase();
+        // Read from Local SQLite db to populate shop list
+        if (0 < myDB.getAllShops().size()) {
+            for (int i = 1; i <= myDB.getAllShops().size(); i++) {
+                ShopCard shopCard = new ShopCard();
+                Shop shop;
+                shop = myDB.getShop(i);
+                shopCard.setName(shop.getName());
+                shopCard.setShopPhone(shop.getPhoneNum());
+                shopCard.setShopAddress(shop.getAddress());
+                shopCard.setNumPoints(pointCount(shop.getShopID()) - 1);
+                shopCard.setShopImage(shopImages[pointCount(shop.getShopID())]);
+                shopCard.setLat(Double.valueOf(shop.getLat()));
+                shopCard.setLng(Double.valueOf(shop.getLng()));
+                shopCard.setShopID(shop.getShopID());
+                shopList.add(shopCard);
+            }
+            myDB.close();
         }
+        adapter.notifyDataSetChanged();
     }
 
     // pointCount() calculates the number of points collected by the user/
     // The Max + 1 Visit is when the user redeems the free coffee so that is why
-    // pointCount = visitCount % MAX_VISITS_FOR_FREE_COFFEE + 1 or (visitCount % 10 points) if Max = 9
+    // pointCount = visitCount % MAX_VISITS_FOR_FREE_COFFEE + 1 or (visitCount % 11 points) if Max = 9
     // The user will be locked into collecting the free coffee before registering further points to avoid
     // overflow of points - alternative solution would be to implement a 'Redeemed Points' table and log
     // how many free 'credits' the user has collected. As this is extra work we are just going for MVP.

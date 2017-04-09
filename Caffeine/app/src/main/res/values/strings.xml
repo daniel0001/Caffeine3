@@ -21,6 +21,7 @@
     <string name="new_shop_title">New Coffee Shop</string>
     <string name="location_off">Please switch on your location services</string>
     <string name="new_shop_instructions">Please make sure that this is the correct wifi name for the Coffee Shop that you are currently in. Check with a staff member if unsure.</string>
+    <string name="shop_name">shop name</string>
     <string name="shop_address">Shop Address</string>
     <string name="find_this_shop">Find Shop</string>
     <string name="confirm_button">Add to My Shops</string>
@@ -60,6 +61,8 @@
     <string name="congrats_free_coffee">Congratulations! \nYou have earned a free coffee by being a loyal customer of:</string>
 
     <string name="no_visits">No visits to show in your list</string>
+    <string name="tv_list_title">List of all current points for:</string>
+    <string name="tv_date_column">Date of Loyalty Points Collected</string>
 
 </resources>
 

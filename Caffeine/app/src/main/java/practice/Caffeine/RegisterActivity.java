@@ -173,6 +173,7 @@ public class RegisterActivity extends AppCompatActivity {
                                                              }
                                                              Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                                                              intent.putExtra("username", username);
+                                                             finish();
                                                              RegisterActivity.this.startActivity(intent);
                                                          }
                                                      } catch (JSONException e) {
