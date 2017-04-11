@@ -1,18 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:screenOrientation="portrait"
-    android:weightSum="1"
-    tools:context="practice.Caffeine.NewCoffeeShopActivity">
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:screenOrientation="portrait"
+                android:weightSum="1"
+                tools:context="practice.Caffeine.NewCoffeeShopActivity">
+
+    <ImageView
+        android:id="@+id/ivLoveCofOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        app:srcCompat="@drawable/lovecof"
+        />
 
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/mapView"
-        class="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="200dp" />
+              android:id="@+id/mapView"
+              class="com.google.android.gms.maps.SupportMapFragment"
+              android:layout_width="match_parent"
+              android:layout_height="200dp"/>
 
     <TextView
         android:id="@+id/tvRegisterTitle"

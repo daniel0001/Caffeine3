@@ -8,9 +8,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.SupplicantState;
@@ -18,7 +15,6 @@ import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
@@ -26,6 +22,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,7 +66,6 @@ public class NewCoffeeShopActivity extends AppCompatActivity implements OnMapRea
     private Button btnAddShop;
     private TextView tvShopName;
     private String shopName;
-    private TextView tvWifiSSID;
     private TextView tvShopAddress;
     private String wifiSSID;
     private String wifiMAC;
@@ -81,20 +77,14 @@ public class NewCoffeeShopActivity extends AppCompatActivity implements OnMapRea
     private List<Integer> placeTypes;
     private boolean gpsEnabled;
     private boolean wifiConnected;
-    private Double userLat;
-    private Double userLng;
-    private LatLng userLatLng;
     private LatLng shopLatLng;
     private GoogleMap map;
     private int shopID;
-    private Integer LOCATION_REFRESH_TIME = 5000;
-    private Integer LOCATION_REFRESH_DISTANCE = 5;
     private int PLACE_PICKER_REQUEST = 1;
-    private LocationManager locationManager;
-    private LocationListener locationListener;
     private LatLng mapLatLng;
     private String mapTitle;
     private SupportMapFragment mapFragment;
+    private ImageView ivMapOverlay;
 
     public static String getMacAddr() {
         try {
@@ -136,43 +126,12 @@ public class NewCoffeeShopActivity extends AppCompatActivity implements OnMapRea
         wifiSSID = null;
         wifiMAC = null;
 
-        // Get the userLatLng to add a fixed map of current location
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        locationListener = new LocationListener() {
+        ivMapOverlay = (ImageView) findViewById(R.id.ivLoveCofOverlay);
+        ivMapOverlay.setVisibility(View.VISIBLE);
 
-            @Override
-            public void onLocationChanged(Location location) {
-
-            }
-
-            @Override
-            public void onStatusChanged(String s, int i, Bundle bundle) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String s) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String s) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-            }
-        };
-
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, LOCATION_REFRESH_TIME, LOCATION_REFRESH_DISTANCE, locationListener);
-        Log.d("location : ", locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) + "");
-        Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        userLat = location.getLatitude();
-        userLng = location.getLongitude();
-        userLatLng = new LatLng(userLat, userLng);
-        mapLatLng = userLatLng;
-        mapTitle = "Use Find Shop Button Below";
 
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.mapView);
-        mapFragment.getMapAsync(this);
+        findViewById(R.id.mapView).setVisibility(View.INVISIBLE);
 
         // Store shops to local shops table SQLite DB
         final DatabaseHelper myDB = new DatabaseHelper(this);
@@ -210,6 +169,9 @@ public class NewCoffeeShopActivity extends AppCompatActivity implements OnMapRea
         btnPlacePicker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                ivMapOverlay.setVisibility(View.INVISIBLE);
+                findViewById(R.id.mapView).setVisibility(View.VISIBLE);
                 CheckConnectedHelper checkConnectedHelper = new CheckConnectedHelper(NewCoffeeShopActivity.this);
                 if (!checkConnectedHelper.checkConnected(gpsEnabled, wifiConnected)) return;
                 // Construct an intent for the place picker
@@ -221,11 +183,11 @@ public class NewCoffeeShopActivity extends AppCompatActivity implements OnMapRea
                 } catch (GooglePlayServicesNotAvailableException e) {
                     // ...
                 }
-
             }
 
 
         });
+
         btnAddShop.setOnClickListener(
                 new View.OnClickListener() {
                     public void onClick(View v) {
@@ -351,8 +313,6 @@ public class NewCoffeeShopActivity extends AppCompatActivity implements OnMapRea
             phone = place.getPhoneNumber().toString();
             placeTypes = place.getPlaceTypes();
             placeID = place.getId();
-            mapLatLng = shopLatLng;
-            mapTitle = shopName;
             mapFragment.getMapAsync(this);
 
 
@@ -363,9 +323,9 @@ public class NewCoffeeShopActivity extends AppCompatActivity implements OnMapRea
     public void onMapReady(GoogleMap map) {
 
         MapsInitializer.initialize(NewCoffeeShopActivity.this);
-        map.addMarker(new MarkerOptions().position(mapLatLng).title(mapTitle));
+        map.addMarker(new MarkerOptions().position(shopLatLng).title(shopName));
         CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(mapLatLng) // Center Set
+                .target(shopLatLng) // Center Set
                 .zoom(18.0f)                // Zoom
                 .bearing(0)                // Orientation of the camera to east
                 .tilt(30)                   // Tilt of the camera to 30 degrees
@@ -397,6 +357,5 @@ public class NewCoffeeShopActivity extends AppCompatActivity implements OnMapRea
                 break;
         }
     }
-
 
 }

@@ -68,7 +68,7 @@ public class VisitListActivity extends AppCompatActivity {
                     }
                 }
             for (int i = 0; i < displayVisitList.size(); i++) {
-                //TODO: Timezones below need to be fixed - 09/04/2017
+                //TODO: Timezones below need to be fixed as it is working from the hostgator server time which is in CST- 09/04/2017
                 Visit lvVisit = displayVisitList.get(i);
                 String lvDate = lvVisit.getDate();
                 SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
